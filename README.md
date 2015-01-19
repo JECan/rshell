@@ -1,8 +1,3 @@
-# Program Overview 
-## How to use 
-### Installation guide
-#### Bugs/Limitations
-
 Program Overview
 ====
 Program overview goes here
