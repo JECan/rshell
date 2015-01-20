@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <stdio.h>					// for perror()
 #include <errno.h>					// for perror()
 #include <sys/types.h>				// for wait()
@@ -25,17 +26,21 @@ int main(int argc, char **argv)
 
 	for(int i = 0; i < 50; i++)
 	{
+		//loop so only user@hammer is displayed 
+		//instead of user@hammer.cs.ucr.edu
 		if(host[i] == '.') host[i] = '\0';
 	}
 
 	while(1)
 	{
 		//output user and host
-		cout << user << "@" << host << "$";
+		cout << user << "@" << host << "$ "; 
 
 		char userinput[999];
+
+		//gets user input, and if user input is "exit" program exits
 		cin.getline(userinput,999);
-		if(userinput == "exit") exit(1);
+		if(strcmp(userinput,"exit") == 0) exit(1);	
 	}
 
 	return 0;
