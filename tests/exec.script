@@ -1,120 +1,147 @@
-Script started on Fri 23 Jan 2015 10:48:03 PM PST
+Script started on Fri 23 Jan 2015 11:17:50 PM PST
 ~
 jcand003@hammer $ ls
 [0m[01;34mCS100[0m/  [01;34mcs14[0m/  [01;34mcs61[0m/  [01;34mDesktop[0m/  [01;34mDownloads[0m/  [01;34mwhatever[0m/
 [m~
-jcand003@hammer $ cd CS100/
-~/CS100
-jcand003@hammer $ ls
-[0m[01;34mfirstrepo[0m/  [01;34mgit-game[0m/  [01;34mquiz[0m/  [01;34mrshell[0m/  [01;34mucr-cs100[0m/
-[m~/CS100
-jcand003@hammer $ cd rshell/
+jcand003@hammer $ cd CS100/rshell/r[K[K
 ~/CS100/rshell
 jcand003@hammer $ ls
 [0m[01;34mbin[0m/  LICENSE  Makefile  README.md  [01;34msrc[0m/  [01;34mtests[0m/
 [m~/CS100/rshell
-jcand003@hammer $ Make[K[K[K[Kmake
+jcand003@hammer $ make
 if [ ! -d bin ]; then mkdir bin; fi
 g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
 ~/CS100/rshell
 jcand003@hammer $ bin/rshell
 jcand003@hammer$ ls
 bin  LICENSE  Makefile	README.md  src	tests
-jcand003@hammer$ #now beginning test
-jcand003@hammer$ #test for empty input
-jcand003@hammer$ 
-jcand003@hammer$ #test for em            test                                           
-jcand003@hammer$ #test for basic commands
+jcand003@hammer$ ; ;s    ls && ls -a
+bin  LICENSE  Makefile	README.md  src	tests
+.  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
+jcand003@hammer$ ls &&& ls -a
+bin  LICENSE  Makefile	README.md  src	tests
+.  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
+jcand003@hammer$ //failed test case of &&&& , argument accec pted when error should be thrown
+error execvp(): No such file or directory
+error execvp(): No such file or directory
+jcand003@hammer$ #failed test case of &&&  , arguement accepted when error should be thrown
+jcand003@hammer$ ls || ls -a
+bin  LICENSE  Makefile	README.md  src	tests
+.  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
+jcand003@hammer$ #or ta     || failed test case, when first is true second shouldnt exece  cute
+jcand003@hammer$ ls ||| ls -a
+bin  LICENSE  Makefile	README.md  src	tests
+.  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
+jcand003@hammer$ echo hello || false
+hello
+jcand003@hammer$ #passes when first true second false
+jcand003@hammer$ #test for basic semicolons
+jcand003@hammer$ ls;pwd;echo hello; fa  echo;  world
+bin  LICENSE  Makefile	README.md  src	tests
+/home/csmajs/jcand003/CS100/rshell
+hello
+world
+jcand003@hammer$ ls;pwd;echo hello ; echo
+bin  LICENSE  Makefile	README.md  src	tests
+/home/csmajs/jcand003/CS100/rshell
+hello
+
+jcand003@hammer$ #fails test cases  . sould      shoul     hould throw eer  rror when seperator keys are entered but doesnt
+jcand003@hammer$ ;
+jcand003@hammer$ ||
+jcand003@hammer$ &&
+jcand003@hammer$ ;;;;;;;;;;;;;;;;;;;;;;
+jcand003@hammer$ ||||||||||||||||||||||||||
+jcand003@hammer$ &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+jcand003@hammer$ don   fail || not here || keep goin     going || echo whatup      you ma   madeit
+error execvp(): No such file or directory
+error execvp(): No such file or directory
+error execvp(): No such file or directory
+youmadeit
+jcand003@hammer$ echo hell    "hello                 " wro  orld"
+"hello world"
+jcand003@hammer$ #failed test for echo
+jcand003@hammer$ ls && pwd
+bin  LICENSE  Makefile	README.md  src	tests
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ls && pwd && echo hellotehre    here && echo nexttestplz
+bin  LICENSE  Makefile	README.md  src	tests
+/home/csmajs/jcand003/CS100/rshell
+hellothere
+nexttestplz
+jcand003@hammer$ mkdir s wumbo
+jcand003@hammer$ ls
+bin  LICENSE  Makefile	README.md  src	tests  wumbo
+jcand003@hammer$ rm   mdir     cd wumbo
+error execvp(): No such file or directory
+jcand003@hammer$ ls
+bin  LICENSE  Makefile	README.md  src	tests  wumbo
+jcand003@hammer$ rmdir wumbo
 jcand003@hammer$ ls
 bin  LICENSE  Makefile	README.md  src	tests
-jcand003@hammer$ ls -a
-.  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
-jcand003@hammer$ ls -a -l
+jcand003@hammer$ ls -a -l -a -l
 total 52
-drwx------ 6 jcand003 csmajs  4096 Jan 23 22:06 .
+drwx------ 6 jcand003 csmajs  4096 Jan 23 23:24 .
 drwx------ 7 jcand003 csmajs  4096 Jan 21 12:16 ..
-drwx------ 2 jcand003 csmajs  4096 Jan 23 22:45 bin
-drwx------ 8 jcand003 csmajs  4096 Jan 23 21:21 .git
+drwx------ 2 jcand003 csmajs  4096 Jan 23 23:15 bin
+drwx------ 8 jcand003 csmajs  4096 Jan 23 23:07 .git
 -rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
 -rw------- 1 jcand003 csmajs   214 Jan 23 21:10 Makefile
 -rw------- 1 jcand003 csmajs   568 Jan 23 21:00 README.md
 drwx------ 2 jcand003 csmajs  4096 Jan 23 22:02 src
-drwx------ 2 jcand003 csmajs  4096 Jan 23 22:44 tests
-jcand003@hammer$ #test for semicolon passes al    with    with multiple arguee ments
-jcand003@hammer$ ls;pwd;c echohel    eh  eh  eoo   hello; echo world; 
-bin  LICENSE  Makefile	README.md  src	tests
+drwx------ 2 jcand003 csmajs  4096 Jan 23 23:14 tests
+jcand003@hammer$ echo he#llooooooodontprint
+he
+jcand003@hammer$ ls  ech#o helloooooooooooooooooooooooooooooooooooo
+error execvp(): No such file or directory
+jcand003@hammer$ ;pwd
 /home/csmajs/jcand003/CS100/rshell
-hello
-world
-jcand003@hammer$ #semicolon test with no semicolon at end
-jcand003@hammer$ ls;pwd;echohe   hello; echo world
-bin  LICENSE  Makefile	README.md  src	tests
+jcand003@hammer$ ;;pwd
 /home/csmajs/jcand003/CS100/rshell
-hello
-world
-jcand003@hammer$ #spaces         #test for spaces followe d   ed by command 
-jcand003@hammer$                                           ls;pwd                              ; h echo hello
-bin  LICENSE  Makefile	README.md  src	tests
+jcand003@hammer$ ;;;;;;;;;;;;;;;;;;pwd
 /home/csmajs/jcand003/CS100/rshell
-hello
-jcand003@hammer$ #test for comments
-jcand003@hammer$ #
-jcand003@hammer$ ls #followed by gibberish passses
-bin  LICENSE  Makefile	README.md  src	tests
-jcand003@hammer$ #connectors test
-jcand003@hammer$ echo hello && echo world && echo myname is jonathan
-hello
-world
-myname is jonathan
-jcand003@hammer$ echo hello && ech  o world; echo mynameis Jonathan && ls; false && echo no put      dontp ouput
-hello
-world; echo mynameis Jonathan
-error execvp(): No such file or directory
-dontouput
-jcand003@hammer$ #this test fails, echo world i exe tended to echo mynameisJonathan
-jcand003@hammer$ ## test for just connectors in input
-jcand003@hammer$ # ;
-jcand003@hammer$ ||
-jcand003@hammer$ &&
-jcand003@hammer$ #failed test for just connectors in output, should throw error
-jcand003@hammer$ mul   #test for multiple instances of connectors should throw errro  r or but fails to
-jcand003@hammer$ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-jcand003@hammer$ |||||||||||||||||||||||||||||||||||||||||||||||||||
-jcand003@hammer$ &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-jcand003@hammer$ ech   ture     rue && echo comment#testthisshouldnt ouput
-comment
-jcand003@hammer$ echo hello || echo dontoutput
-hello
-dontoutput
-jcand003@hammer$ #basic use of or faiils    ils don   when first instance is tre  rue
-jcand003@hammer$ echo hello ||     ; echo tts  est && echo whatever
-hello; echo test
-whatever
-jcand003@hammer$ #program fails to recognize ; delimiter when using echo
-jcand003@hammer$ one || two || three || echo test
-error execvp(): No such file or directory
-error execvp(): No such file or directory
-error execvp(): No such file or directory
-test
-jcand003@hammer$ #program does continue to search for correct command using ors
-jcand003@hammer$ ls; th  oops; pwd; aaaaa
-bin  LICENSE  Makefile	README.md  src	tests
-error execvp(): No such file or directory
+jcand003@hammer$ && pwd
 /home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ || pwd
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ||||||||||pwd
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #does not throw error when seperator characters are entered followed by o command
+jcand003@hammer$ #inc valid phrases
+jcand003@hammer$ asdf
 error execvp(): No such file or directory
-jcand003@hammer$ #continu       a chain of orr   correct and ino correct commands executes correctly
-jcand003@hammer$ #the entire chain of commands ei   , eithr er an error or    is thrown or c command executed
-jcand003@hammer$ #flags and connector test  , several spaces between
-jcand003@hammer$ ls                               -a                                                                                          ; pwd; echo yo;                                                                                                                   pwd
+jcand003@hammer$ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+jcand003@hammer$ #failes    s test cse    ase when longer than 100 characters
+jcand003@hammer$ ddddddddddddddddddddddddddddddddddddddddddddddddddd
+error execvp(): No such file or directory
+jcand003@hammer$ #passes when shorter
+jcand003@hammer$ ls ls ls      ;;s  ls
+bin  LICENSE  Makefile	README.md  src	tests
+bin  LICENSE  Makefile	README.md  src	tests
+jcand003@hammer$ ls -l || pwd'   ; ls -a
+total 40
+drwx------ 2 jcand003 csmajs  4096 Jan 23 23:15 bin
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   214 Jan 23 21:10 Makefile
+-rw------- 1 jcand003 csmajs   568 Jan 23 21:00 README.md
+drwx------ 2 jcand003 csmajs  4096 Jan 23 22:02 src
+drwx------ 2 jcand003 csmajs  4096 Jan 23 23:14 tests
+error execvp(): No such file or directory
+jcand003@hammer$ ls -a
 .  ..  bin  .git  LICENSE  Makefile  README.md	src  tests
+jcand003@hammer$ #ls -l || pwd; ls -a throws w error, should not
+jcand003@hammer$ #exit does exit program but throws error to execvp()
+jcand003@hammer$ EXit
+error execvp(): No such file or directory
+jcand003@hammer$ EXIT
+error execvp(): No such file or directory
+jcand003@hammer$ pwd invalidsuffhere
+pwd: ignoring non-option arguments
 /home/csmajs/jcand003/CS100/rshell
-yo
-/home/csmajs/jcand003/CS100/rshell
-jcand003@hammer$ #exit h thro    dies e     oes exit the program but throws and error in exect vp()
 jcand003@hammer$ exit
 error execvp(): No such file or directory
 ~/CS100/rshell
 jcand003@hammer $ exit
 exit
 
-Script done on Fri 23 Jan 2015 11:09:32 PM PST
+Script done on Fri 23 Jan 2015 11:35:56 PM PST
