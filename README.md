@@ -1,6 +1,6 @@
-Program Overview
+rshell
 ====
-Program overview goes here
+rshell is a basic command shell. It displays the currently logged in user as well as host name followed by a '$' command prompt. It is able to take in commands and execute them. There are however, several bugs and limitations in the program listed below.
 
 How to use
 ====
