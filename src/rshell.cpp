@@ -39,7 +39,6 @@ int main()
 	}
 	
 	displayuser = username + "@" + host + "$ ";
-	
 	char SEMICOLON[] = ";";
 	char ANDING[] = "&&";
 	char ORING[] = "||";
@@ -71,7 +70,7 @@ int main()
 		{
 			parse(userinput,ORING);
 		}
-		else//(userinput.find(";"))
+		else
 		{
 			parse(userinput,SEMICOLON);
 		}
@@ -106,7 +105,6 @@ void parse(const string &usercommand, const char specialchar[])
 			perror("error with fork()");
 			exit(1);
 		}
-
 		//else if pid == 0 were in child
 		else if(pid == 0)
 		{
@@ -130,19 +128,16 @@ void parse(const string &usercommand, const char specialchar[])
 				perror("error execvp()");
 				exit(1);
 			}
-
 		}
 		//else we are in parent
 		else
 		{
 			int parentstatus = 0;
-
 			if(wait(&parentstatus) == -1)
 			{
 				perror("error with wait()");
 				exit(1);
 			}
-
 		}
 	}
 }//void parse()
