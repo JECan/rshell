@@ -48,3 +48,4 @@ does not throw and error, the same applies for the & and ;
 ```
    ddddddddddddddddd.....ddddddddddddd
 ```
+* exit command does exit program but throws error to execvp()
