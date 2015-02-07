@@ -84,10 +84,13 @@ int main(int argc, char **argv)
 	if(isrecursive == true) cout << "-R true\n";
 	else cout << "-R false\n";
 
-	for (int i = 0; i < userinput.size(); i++)
-	{
-		cout << userinput.at(i) << endl;
-	}
+	//first thing in vector will always be executable i.e(./a.out)
+	//this will make vector so it only contains the filenames & directoies
+	userinput.erase(userinput.begin());
+//	for (int i = 0; i < userinput.size(); i++)
+//	{
+//		cout << i << ": "  << userinput.at(i) << endl;
+//	}
 
 	return 0;
 }//end of main()
