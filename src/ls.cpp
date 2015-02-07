@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 	bool isrecursive;
 	
 	//determine the filenames or directories entered by the user
+	//and store them in a vector, disregard the flags
 	for(int i = 0; i < argc; ++i)
 	{
 		//if flag
@@ -99,7 +100,6 @@ int main(int argc, char **argv)
 //		cout << i << ": "  << userinput.at(i) << endl;
 //	}
 
-
 	//sort the user inputs alphabetically
 	sort(userinput.begin(), userinput.end(), less<string>());	
 	//determine inputs: if its file, directory, or valid at all
@@ -107,9 +107,32 @@ int main(int argc, char **argv)
 	{
 		cout << userinput.at(i) << endl;
 	}
-	//now sort user input alphabetically
+	
+	for(int i = 0; i < userinput.size(); i++)
+	{
+		struct stat determine;
+		if(stat(userinput.at(i).c_str(), &determine) == -1)
+		{
+			perror("stat() error\n");
+			exit(1);
+		}
+		if(S_ISDIR(determine.st_mode))
+		{
+			thedirectories.push_back(userinput.at(i));
+		}
+		if(S_ISREG(determine.st_mode))
+		{
+			thefiles.push_back(userinput.at(i));
+		}
+	}
 
+	//sort vector of files and directories alphabetically
+	sort(thefiles.begin(), thefiles.end(), less<string>());	
+	cout << "thefiles: " << thefiles.size() << endl;
+	sort(thedirectories.begin(), thedirectories.end(), less<string>());	
+	cout << "thedirs: " << thedirectories.size() << endl;
 
+	
 	return 0;
 }//end of main()
 /*
