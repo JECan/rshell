@@ -31,6 +31,8 @@ int main(int argc, char **argv)
 /*	int flags = 0;
 */
 	vector <string> userinput;
+	vector <string> thefiles;
+	vector <string> thedirectories;
 	string thedot = ".";
 	bool ishidden;
 	bool islist;
@@ -55,7 +57,12 @@ int main(int argc, char **argv)
 	int count; 
 	while((count = getopt(argc, argv,"alR")) != -1)
 	{
-		if (count == '?'){perror("getopt() error\n");}
+		if (count == '?')
+		{
+			perror("getopt() error\n");
+			exit(1);
+		}
+
 		switch(count)
 		{
 		case 'a':
@@ -91,6 +98,17 @@ int main(int argc, char **argv)
 //	{
 //		cout << i << ": "  << userinput.at(i) << endl;
 //	}
+
+
+	//sort the user inputs alphabetically
+	sort(userinput.begin(), userinput.end(), less<string>());	
+	//determine inputs: if its file, directory, or valid at all
+	for(int i = 0; i < userinput.size(); i++)
+	{
+		cout << userinput.at(i) << endl;
+	}
+	//now sort user input alphabetically
+
 
 	return 0;
 }//end of main()
