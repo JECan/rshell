@@ -13,12 +13,15 @@
 #include <iomanip>
 
 //#define BLUEDIR "\033[34m";
-//#define GREENEXE "\033[32m";
+#define GREENEXE cout <<"\033[32m";
+#define DEFAULT cout << "\033[0m";
 //#define GRAYHIDDEN "\033";
 //#define DEFAULTCOL "\033[0m";
 using namespace std;
 
 //void permis(struct stat s);
+void outputreg(const vector<string> losfiles, const vector<string> losdirs);
+void outputhidden(const vector<string> losfiles, const vector<string> losdirs);
 
 int main(int argc, char **argv)
 {
@@ -34,9 +37,9 @@ int main(int argc, char **argv)
 	vector <string> thefiles;
 	vector <string> thedirectories;
 	string thedot = ".";
-	bool ishidden;
-	bool islist;
-	bool isrecursive;
+	bool ishidden = false;
+	bool islist = false;
+	bool isrecursive = false;
 	
 	//determine the filenames or directories entered by the user
 	//and store them in a vector, disregard the flags
@@ -102,12 +105,13 @@ int main(int argc, char **argv)
 
 	//sort the user inputs alphabetically
 	sort(userinput.begin(), userinput.end(), less<string>());	
-	//determine inputs: if its file, directory, or valid at all
+
 	for(int i = 0; i < userinput.size(); i++)
 	{
-		cout << userinput.at(i) << endl;
+		cout << "user entered: " << userinput.at(i) << endl;
 	}
 	
+	//determines if file or directory, or if input is valid at all
 	for(int i = 0; i < userinput.size(); i++)
 	{
 		struct stat determine;
@@ -128,13 +132,99 @@ int main(int argc, char **argv)
 
 	//sort vector of files and directories alphabetically
 	sort(thefiles.begin(), thefiles.end(), less<string>());	
-	cout << "thefiles: " << thefiles.size() << endl;
-	sort(thedirectories.begin(), thedirectories.end(), less<string>());	
-	cout << "thedirs: " << thedirectories.size() << endl;
-
+	cout << "\nthefiles: " << thefiles.size() << endl;
+	for(int i = 0; i < thefiles.size(); i++)
+	{
+		cout << thefiles.at(i) << endl;
+	}
 	
+	
+	sort(thedirectories.begin(), thedirectories.end(), less<string>());	
+	cout << "\nthedirs: " << thedirectories.size() << endl;
+	for(int i = 0; i < thedirectories.size(); i++)
+	{
+		cout << thedirectories.at(i) << endl;
+	}
+
+	if(ishidden == false)
+	{
+		outputreg(thefiles, thedirectories);
+	}
+	else
+	{
+		outputhidden(thefiles, thedirectories);
+	}
+
 	return 0;
 }//end of main()
+//------------------------------------------------------------------------
+void outputreg(const vector<string> losfiles, const vector<string> losdirs)
+{
+	for(int i = 0; i < losfiles.size(); i++)
+	{
+		if(losfiles.empty()) break;
+		struct stat filebuf;
+
+		if((stat(losfiles.at(i).c_str(), &filebuf)) == -1)
+		{
+			perror("stat() error!\n");
+			exit(1);
+		}
+//		if(filebuf.st_mode & S_IXUSR)
+//		{
+//			cout << "ayayayay" << endl;	
+//			cout << GREENEXE << losfiles.at(i) << endl;
+//			cout << "lololol" << endl;
+//		}
+//		else
+///		{
+			cout << "ayayayay" << endl;	
+			cout << losfiles.at(i) << endl;
+			cout << "lololol" << endl;
+
+//		}
+	}
+
+	for(int i = 0; i < losdirs.size(); i++)
+		{
+			if(losdirs.empty()) break;
+			//errno is set to an obsure number so we know if it changed
+			errno = 25 ;
+			//char *dirname;
+			//dirname = losdirs.at(i).c_str();
+			
+			DIR *dirp = opendir(losdirs.at(i).c_str());
+			if(dirp == NULL)
+			{
+				perror("opendir() error\n");
+				exit(1);
+			}
+			if((losdirs.at(i) == "./") || (losdirs.at(i) == "../"))
+				continue;
+			dirent *direntp;
+			while((direntp = readdir(dirp)))
+			{
+				if(errno != 25)
+				{
+					perror("readdir() error\n");
+					exit(1);
+				}
+				cout << direntp->d_name << endl;
+			}
+			closedir(dirp);
+			if(closedir(dirp) == -1)
+			{
+				perror("closedir() error\n");
+				exit(1);
+			}
+			cout << "asdfasdfasdf" << endl;
+		}
+}//void outputreg()
+void outputhidden(const vector<string> losfiles, const vector<string> losdirs)
+{
+
+}
+
 /*
 void permis(struct stat s)
 {
