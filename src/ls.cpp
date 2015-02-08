@@ -14,8 +14,8 @@
 #include <time.h>
 
 //#define BLUEDIR "\033[34m";
-#define GREENEXE cout <<"\033[32m";
-#define DEFAULT cout << "\033[0m";
+#define GREENEXE "\033[1;32m";
+#define DEFAULT "\033[0;00m";
 //#define GRAYHIDDEN "\033";
 //#define DEFAULTCOL "\033[0m";
 using namespace std;
@@ -55,21 +55,17 @@ int main(int argc, char **argv)
 			perror("getopt() error\n");
 			exit(1);
 		}
-
 		switch(count)
 		{
 		case 'a':
 			ishidden = true;
 			break;
-
 		case 'l':
 			islist = true;
 			break;
-
 		case 'R':
 			isrecursive = true;
 			break;
-		
 		default:
 			cout << "Error, 'a' 'l' 'R' flags only.\n";
 			exit(1);
@@ -84,11 +80,10 @@ int main(int argc, char **argv)
 	if(isrecursive == true) cout << "-R true\n";
 	else cout << "-R false\n----------------------------------\n";
 
-	//first thing in vector will always be executable i.e(./a.out)
-	//this will make vector so it only contains the filenames & directoies
 	userinput.erase(userinput.begin());
 //	for (int i = 0; i < userinput.size(); i++)
 //	{
+//		cout << "USER INPUT #";
 //		cout << i << ": "  << userinput.at(i) << endl;
 //	}
 
@@ -96,7 +91,7 @@ int main(int argc, char **argv)
 	if(userinput.size() > 0)
 	{
 		sort(userinput.begin(), userinput.end(), less<string>());	
-
+		int charlength = 1;
 		for(int i = 0; i < userinput.size(); i++)
 		{
 			cout << "user entered: " << userinput.at(i) << endl;
@@ -116,80 +111,54 @@ int main(int argc, char **argv)
 			}
 			if(S_ISREG(determine.st_mode))
 			{
+				if(userinput.at(i).size() > charlength)
+					charlength = userinput.at(i).size();
 				thefiles.push_back(userinput.at(i));
 			}
-		}//there are now 2 vectors, one of files and one of directories, what the fuck now?
+		}//there are now 3 vectors,
+		//just files, just directories, all userinput
 
-		sort(thefiles.begin(), thefiles.end(), less<string>());	
-		cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
+//		sort(thefiles.begin(), thefiles.end(), less<string>());	
+//		cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
+//		for(int i = 0; i < thefiles.size(); i++)
+//		{
+//			cout << thefiles.at(i) << endl;
+//		}
+//		
+//		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
+//		cout << "\nthedirs: " << thedirectories.size() << endl;
+//		for(int i = 0; i < thedirectories.size(); i++)
+//		{
+//			cout << thedirectories.at(i) << "----------------------------------------------" << endl;
+//		}
+		
+		//for files, they can just be outputted
 		for(int i = 0; i < thefiles.size(); i++)
 		{
-			cout << thefiles.at(i) << endl;
+			struct stat filebuff;
+			if(stat(thefiles.at(i).c_str(), &filebuff) == -1)
+			{
+				perror("stat() error\n");
+				exit(1);
+			}
+//			if(filebuff.st_mode & S_IXUSR)
+//				cout << GREENEXE;
+			cout << left << setw(charlength + 3) << thefiles.at(i)
+					 << endl << endl;
 		}
-		
-		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
-		cout << "\nthedirs: " << thedirectories.size() << endl;
-		for(int i = 0; i < thedirectories.size(); i++)
-		{
-			cout << thedirectories.at(i) << "----------------------------------------------" << endl;
-		}
+
 	}
-	else
+	else// naked ls, now determine what flags
 	{
 		checkflags(ishidden, islist, isrecursive, thedot);
-		cout << "\n";
+		cout << endl << endl;
 	}
-/*
-	//else its just ls, possibly with flags
-	//if its just ls
-	if((ishidden && islist && isrecursive) == false)
-	{
-		//setting errno to some obscure value so we know if it changed
-		errno = 99;
-		const char *dirName = ".";
-		DIR *dirp = opendir(dirName);
-		if(dirp == NULL) 
-		{
-			perror("opendir() error\n");
-			exit(1);
-		}
-		dirent *direntp;
-		while ((direntp = readdir(dirp)))
-		{
-			string temp = direntp->d_name;
-			if(temp.at(0)  == '.')
-			continue;
-
-			if(errno != 99)
-			{
-				perror("readdir() error\n");
-				exit(1);
-			}
-			cout << direntp->d_name << endl; 
-		}
-		if(closedir(dirp) == -1)
-			{
-				perror("closedir() error\n");
-				exit(1);
-			}
-	}
-
-	//there is some sort of flag
-	if(ishidden == false)
-	{
-		outputreg(thefiles, thedirectories);
-	}
-	else
-	{
-		outputhidden(thefiles, thedirectories);
-	}
-*/
-
 	return 0;
 }//end of main() -------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------
 void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 {
+/*
 	for(int i = 0; i < losfiles.size(); i++)
 	{
 		if(losfiles.empty()) break;
@@ -232,7 +201,6 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 				cout << direntp->d_name << endl;
 				//right here i want to store the names into a vector of direntp
 			}
-			//closedir(dirp);
 			if(closedir(dirp) == -1)
 			{
 				perror("closedir() error\n");
@@ -240,59 +208,41 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 			}
 			cout << "============================" << endl;
 		}
+*/
 }//void outputreg()
 void outputhidden(const vector<string> losfiles, const vector<string> losdirs)
 {
-	for(int i = 0; i < losfiles.size(); i++)
-	{
-		if(losfiles.empty()) break;
-		struct stat filebuf;
-
-		if((stat(losfiles.at(i).c_str(), &filebuf)) == -1)
-		{
-			perror("stat() error!\n");
-			exit(1);
-		}
-			cout << "FILES::::::";
-			cout << losfiles.at(i) << endl;
-	}
-
-	for(int i = 0; i < losdirs.size(); i++)
-		{
-			if(losdirs.empty()) break;
-			//errno is set to an obsure number so we know if it changed
-			errno = 25 ;
-			
-			DIR *dirp = opendir(losdirs.at(i).c_str());
-			if(dirp == NULL)
-			{
-				perror("opendir() error\n");
-				exit(1);
-			}
-			dirent *direntp;
-			while((direntp = readdir(dirp)))
-			{
-				if(errno != 25)
-				{
-					perror("readdir() error\n");
-					exit(1);
-				}
-				cout << "HIDDEN DIRECTORY :::::" << losdirs.at(i) << endl;
-				cout << direntp->d_name << endl;
-			}
-			//closedir(dirp);
-			if(closedir(dirp) == -1)
-			{
-				perror("closedir() error\n");
-				exit(1);
-			}
-			cout << "============================" << endl;
-		}
-
 }
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 {
-
+	//set errno to obbcsure value so we know if it changed
+	errno = 59;
+	vector <string> docheck;
+	DIR *dirp = opendir(mydot.c_str());
+	if(dirp == NULL)
+	{
+		perror("opendir() error\n");
+		exit(1);
+	}
+	dirent *direntp;
+	while(direntp = readdir(dirp))
+	{
+		if(errno != 59)
+		{
+			perror("readdir() error\n");
+			exit(1);
+		}
+		docheck.push_back(direntp->d_name);
+	}
+	if(closedir(dirp) == -1)
+	{
+		perror("closedir() error\n");
+		exit(1);
+	}
+	//contents of what we want to ls are now in a vector
+	//now do flag check and determine how to output them
+	sort(docheck.begin(),docheck.end(), less<string>());
+	//cases: -a, -l, -R, -al, -aR, -lR, -alR
 }//void checkflags-------
 
 /*
@@ -300,6 +250,8 @@ void permis(struct stat s)
 {
 	struct passwd *mypasswd;
 	struct group *mygroup;
+	struct stat s;
+	string lastedit;
 
 	if(S_ISREG(s.st_mode)) cout << "-";
 	else if(S_ISDIR(s.st_mode)) cout << "d";
@@ -320,12 +272,15 @@ void permis(struct stat s)
 	cout << ((s.st_mode & S_IXOTH) ? "x":"-");
 	cout << " ";
 
-	//INODE GOES HERE AFTER PERMISS BEFORE USERS
-	
+	time = ctime(&s.st_mtime);
 	mypasswd = getpwuid(s.st_uid);
 	if(mypasswd == NULL) {perror("getpwuid() error");}
 	mygroup = getgrgid(s.st_gid);
 	if(mygroup == NULL) {perror("getgrgid() error");}
+
+	cout << "   " << statbuf.st_nlink << "   " << mypasswd->pw_name
+	     << "   " << mygroup->gr_name << "   " << lastedit << "   "
+	     << endl;
 
 }//void permis()
 */
