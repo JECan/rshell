@@ -26,6 +26,8 @@ void permis(const char *thingy);
 void outputreg(const vector<string> losfiles, const vector<string> losdirs);
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot);
 void outputfile(const bool &dashl, const string &myfiles);
+void dothedir(const bool &dasha, const bool &dashl, const string &mydir);
+void recurse(const bool &dasha, const bool &dashl, const string &mydir);
 
 int main(int argc, char **argv)
 {
@@ -36,20 +38,18 @@ int main(int argc, char **argv)
 	bool ishidden = false;
 	bool islist = false;
 	bool isrecursive = false;
-	
+	int count;
+
 	for(int i = 0; i < argc; ++i)
 	{
 		if (argv[i][0] == '-')
-		{
-			for(int j = 1; argv[i][j] != ' '; j++)
 			{
-				continue;
+				for(int j = 1; argv[i][j] != ' '; j++)
+					{continue;}
 			}
-		}
 		else {userinput.push_back(argv[i]);}
 	}
 
-	int count; 
 	while((count = getopt(argc, argv,"alR")) != -1)
 	{
 		if (count == '?')
@@ -76,11 +76,6 @@ int main(int argc, char **argv)
 	}
 
 	userinput.erase(userinput.begin());
-//	for (int i = 0; i < userinput.size(); i++)
-//	{
-//		cout << "USER INPUT #";
-//		cout << i << ": "  << userinput.at(i) << endl;
-//	}
 
 	//the user input something aside from a flag: a file, directory, or invalid thing
 	if(userinput.size() > 0)
@@ -123,20 +118,19 @@ int main(int argc, char **argv)
 			}
 		}
 
-//		sort(thefiles.begin(), thefiles.end(), less<string>());	
-//		cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
-//		for(int i = 0; i < thefiles.size(); i++)
-//		{
-//			cout << thefiles.at(i) << endl;
-//		}
-//		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
-//		cout << "\nthedirs: " << thedirectories.size() << endl;
-//		for(int i = 0; i < thedirectories.size(); i++)
-//		{
-//			cout << thedirectories.at(i) << "----------------------------------------------" << endl;
-//		}
+
+		//now for directories
+		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
+		for(int i = 0; i < thedirectories.size(); i++)
+		{
+			if(thedirectories.empty()) break;
+	//		if(isrecursive == true)
+	//			recurse();
+			dothedir(ishidden, islist, thedirectories.at(i));
+		}
+
+
 		
-		//for files, they can just be outputted
 
 	}
 	else// naked ls, now determine what flags
@@ -158,9 +152,89 @@ void outputfile(const bool &dashl, const string &myfiles)
 	}
 	else//we have to output its properties. 
 		permis(temp);
+}//void outputfile()
+
+void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
+{
+	vector<const char *>contents;
+	string dummy;
+	//setting errno to an obscure value so we know if it changed
+	const char* temp = mydir.c_str();
+	DIR *dirp = opendir(temp);
+	if(dirp == NULL)
+	{
+		perror("opendir() error\n");
+		exit(1);
+	}
+	dirent *direntp;
+
+	cout << mydir << ":" << endl;
+	while((direntp = readdir(dirp)))
+	{
+		errno = 33;
+		if(errno != 33)
+		{
+			perror("readdir() erroar");
+			exit(1);
+		}
+
+		//case 00: hidden and list false
+		//WORKS!!!
+		if((dasha == false) && (dashl == false))
+		{
+			dummy = direntp->d_name;
+			if(dummy.at(0) == '.')
+			continue;
+			cout << direntp->d_name << endl;
+		}
+
+		//case 01: hidden false, list true
+		//FIX IT!!!
+		else if((dasha == false) && (dashl == true))
+		{
+			dummy = direntp->d_name;
+			if(dummy.at(0) == '.')
+			continue;
+			contents.push_back(dummy.c_str());
+			sort(contents.begin(),contents.end(), less<const char*>());
+			for(int i = 0; i < contents.size(); i++)
+			{
+				permis(contents.at(i));
+			}
+		}
+
+		//case 10: hidden true, list false
+		//WORKS!!!!
+		else if((dasha == true) && (dashl == false))
+		{
+			cout << direntp->d_name << endl;
+		}
+
+		//case 11: hidden true, list rue
+		//FIX IT
+		else if((dasha == true) && (dashl == true))
+		{
+			dummy = direntp->d_name;
+			contents.push_back(dummy.c_str());
+			for(int i = 0; i < contents.size(); i++)
+			{
+				permis(contents.at(i));
+			}
+		}
+	}
+
+	if(closedir(dirp) == -1)
+	{
+		perror("closedir() error()");
+		exit(1);
+	}
+}//void dothedir()
+
+void recurse(const bool &dasha, const bool &dashl, const string &mydir)
+{
+
 }
 
-//------------------------------------------------------------------------
 void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 {
 /*
@@ -257,9 +331,8 @@ void permis(const char *thingy)
 	if((stat(thingy, &s)) == -1)
 	{
 		perror("stat() errorrr\n");
-		exit(5);
+		exit(1);
 	}
-
 	if(S_ISREG(s.st_mode)) cout << "-";
 	else if(S_ISDIR(s.st_mode)) cout << "d";
 	else if(S_ISCHR(s.st_mode)) cout << "c";
@@ -289,4 +362,3 @@ void permis(const char *thingy)
 	     << " " << lastedit << thingy << endl;
 
 }//void permis()
-
