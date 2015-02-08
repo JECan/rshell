@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string.h>
 #include <algorithm>
 #include <sys/types.h>
 #include <getopt.h>
@@ -22,8 +23,7 @@
 //#define DEFAULTCOL "\033[0m";
 using namespace std;
 
-void permis(const char *thingy);
-void outputreg(const vector<string> losfiles, const vector<string> losdirs);
+void permis(const string &thingy);
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot);
 void outputfile(const bool &dashl, const string &myfiles);
 void dothedir(const bool &dasha, const bool &dashl, const string &mydir);
@@ -82,10 +82,10 @@ int main(int argc, char **argv)
 	{
 		sort(userinput.begin(), userinput.end(), less<string>());	
 		int charlength = 1;
-		for(int i = 0; i < userinput.size(); i++)
-		{
-			cout << "user entered: " << userinput.at(i) << endl;
-		}
+//		for(int i = 0; i < userinput.size(); i++)
+//		{
+//			cout << "user entered: " << userinput.at(i) << endl;
+//		}
 		
 		for(int i = 0; i < userinput.size(); i++)
 		{
@@ -129,9 +129,6 @@ int main(int argc, char **argv)
 			dothedir(ishidden, islist, thedirectories.at(i));
 		}
 
-
-		
-
 	}
 	else// naked ls, now determine what flags
 	{
@@ -156,8 +153,11 @@ void outputfile(const bool &dashl, const string &myfiles)
 
 void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 {
-	vector<const char *>contents;
+	vector<string> vec1;//-l vector
+	vector<string> vec2;//-al vector
 	string dummy;
+	string dummy1;
+	string dummy2;
 	//setting errno to an obscure value so we know if it changed
 	const char* temp = mydir.c_str();
 	DIR *dirp = opendir(temp);
@@ -184,7 +184,7 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		{
 			dummy = direntp->d_name;
 			if(dummy.at(0) == '.')
-			continue;
+				continue;
 			cout << direntp->d_name << endl;
 		}
 
@@ -192,15 +192,15 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		//FIX IT!!!
 		else if((dasha == false) && (dashl == true))
 		{
-			dummy = direntp->d_name;
-			if(dummy.at(0) == '.')
-			continue;
-			contents.push_back(dummy.c_str());
-			sort(contents.begin(),contents.end(), less<const char*>());
-			for(int i = 0; i < contents.size(); i++)
-			{
-				permis(contents.at(i));
-			}
+			dummy1 = direntp->d_name;	
+			if(dummy1.at(0) == '.')
+				continue;
+			vec1.push_back(dummy1);
+			sort(vec1.begin(),vec1.end(), less<string>());
+//			for(int i = 0; i < vec1.size(); i++)
+//			{
+//				permis(dummy1.c_str());
+//			}
 		}
 
 		//case 10: hidden true, list false
@@ -214,14 +214,28 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		//FIX IT
 		else if((dasha == true) && (dashl == true))
 		{
-			dummy = direntp->d_name;
-			contents.push_back(dummy.c_str());
-			for(int i = 0; i < contents.size(); i++)
-			{
-				permis(contents.at(i));
-			}
+			dummy2 = direntp->d_name;
+			vec2.push_back(dummy2);
+//			for(int i = 0; i < vec2.size(); i++)
+//			{
+		//		char* temp;
+		//		strcat(temp, "test/");
+		//		strcat(temp, vec2.at(i).c_str());
+		//		permis(temp);
+//			}
+		}
+		sort(vec2.begin(),vec2.end(), less<string>());
+	}
+
+	if((dasha == false) && (dashl == true))
+	{
+		for(int i = 0; i < vec1.size(); i++)
+		{
+			string mytemp = mydir + vec1.at(i);
+			permis(mytemp);
 		}
 	}
+
 
 	if(closedir(dirp) == -1)
 	{
@@ -235,60 +249,6 @@ void recurse(const bool &dasha, const bool &dashl, const string &mydir)
 
 }
 
-void outputreg(const vector<string> losfiles, const vector<string> losdirs)
-{
-/*
-	for(int i = 0; i < losfiles.size(); i++)
-	{
-		if(losfiles.empty()) break;
-		struct stat filebuf;
-
-		if((stat(losfiles.at(i).c_str(), &filebuf)) == -1)
-		{
-			perror("stat() error!\n");
-			exit(1);
-		}
-			cout << "FILES::::::";
-			cout << losfiles.at(i) << endl;
-	}
-
-	for(int i = 0; i < losdirs.size(); i++)
-		{
-			if(losdirs.empty()) break;
-			//errno is set to an obsure number so we know if it changed
-			errno = 25 ;
-			
-			DIR *dirp = opendir(losdirs.at(i).c_str());
-			if(dirp == NULL)
-			{
-				perror("opendir() error\n");
-				exit(1);
-			}
-			dirent *direntp;
-			while((direntp = readdir(dirp)))
-			{
-				string temp = direntp->d_name;
-				if(temp.at(0)  == '.')
-				continue;
-
-				if(errno != 25)
-				{
-					perror("readdir() error\n");
-					exit(1);
-				}
-				cout << "DIRECTORY :::::" << losdirs.at(i) << endl;
-				cout << direntp->d_name << endl;
-				//right here i want to store the names into a vector of direntp
-			}
-			if(closedir(dirp) == -1)
-			{
-				perror("closedir() error\n");
-				exit(1);
-			}
-			cout << "============================" << endl;
-		}
-*/
-}//void outputreg()
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 {
 	//set errno to obbcsure value so we know if it changed
@@ -321,16 +281,17 @@ void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 	//cases: -a, -l, -R, -al, -aR, -lR, -alR
 }//void checkflags-------
 
-void permis(const char *thingy)
+void permis(const string &thingy)
 {
 	struct passwd *mypasswd;
 	struct group *mygroup;
 	struct stat s;
 	string lastedit;
 
-	if((stat(thingy, &s)) == -1)
+	if((stat(thingy.c_str(), &s)) == -1)
 	{
 		perror("stat() errorrr\n");
+		cout << "THINGY*****************" << thingy;
 		exit(1);
 	}
 	if(S_ISREG(s.st_mode)) cout << "-";
