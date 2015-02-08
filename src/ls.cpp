@@ -82,10 +82,10 @@ int main(int argc, char **argv)
 	{
 		sort(userinput.begin(), userinput.end(), less<string>());	
 		int charlength = 1;
-//		for(int i = 0; i < userinput.size(); i++)
-//		{
-//			cout << "user entered: " << userinput.at(i) << endl;
-//		}
+		for(int i = 0; i < userinput.size(); i++)
+		{
+			cout << "user entered: " << userinput.at(i) << endl;
+		}
 		
 		for(int i = 0; i < userinput.size(); i++)
 		{
@@ -130,11 +130,11 @@ int main(int argc, char **argv)
 		}
 
 	}
-	else// naked ls, now determine what flags
-	{
-		checkflags(ishidden, islist, isrecursive, thedot);
-		cout << endl << endl;
-	}
+//	else// naked ls, now determine what flags
+//	{
+//		checkflags(ishidden, islist, isrecursive, thedot);
+//		cout << endl << endl;
+//	}
 	return 0;
 }//end of main() -------------------------------------------------------------------------------------------
 void outputfile(const bool &dashl, const string &myfiles)
@@ -216,6 +216,8 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		{
 			dummy2 = direntp->d_name;
 			vec2.push_back(dummy2);
+
+			sort(vec2.begin(),vec2.end(), less<string>());
 //			for(int i = 0; i < vec2.size(); i++)
 //			{
 		//		char* temp;
@@ -224,15 +226,30 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		//		permis(temp);
 //			}
 		}
-		sort(vec2.begin(),vec2.end(), less<string>());
 	}
 
 	if((dasha == false) && (dashl == true))
 	{
 		for(int i = 0; i < vec1.size(); i++)
 		{
-			string mytemp = mydir + vec1.at(i);
+			string mytemp = mydir;
+			if(mydir.at(mydir.size()-1) != '/')
+				mytemp += '/';
+			mytemp += vec1.at(i);
 			permis(mytemp);
+		}
+	}
+
+	if((dasha == true) && (dashl == true))
+	{
+		for(unsigned i = 0; i < vec2.size(); i++)
+		{
+			string mytemp = mydir;
+			if(mydir.at(mydir.size()-1) != '/')
+				mytemp += '/';
+			mytemp += vec2.at(i);
+			permis(mytemp);
+
 		}
 	}
 
