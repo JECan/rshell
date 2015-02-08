@@ -23,17 +23,10 @@ using namespace std;
 //void permis(struct stat s);
 void outputreg(const vector<string> losfiles, const vector<string> losdirs);
 void outputhidden(const vector<string> losfiles, const vector<string> losdirs);
+void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot);
 
 int main(int argc, char **argv)
 {
-//	char *dirName = ".";
-//	DIR *dirp = opendir(dirName);
-//	dirent *direntp;
-//	while ((direntp = readdir(dirp)))
-//		cout << direntp->d_name << endl; // use stat here to find attributes of file
-//		closedir(dirp);
-/*	int flags = 0;
-*/
 	vector <string> userinput;
 	vector <string> thefiles;
 	vector <string> thedirectories;
@@ -42,11 +35,8 @@ int main(int argc, char **argv)
 	bool islist = false;
 	bool isrecursive = false;
 	
-	//determine the filenames or directories entered by the user
-	//and store them in a vector, disregard the flags
 	for(int i = 0; i < argc; ++i)
 	{
-		//if flag
 		if (argv[i][0] == '-')
 		{
 			for(int j = 1; argv[i][j] != ' '; j++)
@@ -54,11 +44,9 @@ int main(int argc, char **argv)
 				continue;
 			}
 		}
-		//else its a filename or directory,
 		else {userinput.push_back(argv[i]);}
 	}
 
-	//determine which of the three flags to execute
 	int count; 
 	while((count = getopt(argc, argv,"alR")) != -1)
 	{
@@ -104,49 +92,55 @@ int main(int argc, char **argv)
 //		cout << i << ": "  << userinput.at(i) << endl;
 //	}
 
-	//sort the user inputs alphabetically
-	sort(userinput.begin(), userinput.end(), less<string>());	
+	//the user input something aside from a flag: a file, directory, or invalid thing
+	if(userinput.size() > 0)
+	{
+		sort(userinput.begin(), userinput.end(), less<string>());	
 
-	for(int i = 0; i < userinput.size(); i++)
-	{
-		cout << "user entered: " << userinput.at(i) << endl;
-	}
-	
-	//determines if file or directory, or if input is valid at all
-	for(int i = 0; i < userinput.size(); i++)
-	{
-		struct stat determine;
-		if(stat(userinput.at(i).c_str(), &determine) == -1)
+		for(int i = 0; i < userinput.size(); i++)
 		{
-			perror("stat() error\n");
-			exit(1);
+			cout << "user entered: " << userinput.at(i) << endl;
 		}
-		if(S_ISDIR(determine.st_mode))
+		
+		for(int i = 0; i < userinput.size(); i++)
 		{
-			thedirectories.push_back(userinput.at(i));
-		}
-		if(S_ISREG(determine.st_mode))
-		{
-			thefiles.push_back(userinput.at(i));
-		}
-	}
+			struct stat determine;
+			if(stat(userinput.at(i).c_str(), &determine) == -1)
+			{
+				perror("stat() error\n");
+				exit(1);
+			}
+			if(S_ISDIR(determine.st_mode))
+			{
+				thedirectories.push_back(userinput.at(i));
+			}
+			if(S_ISREG(determine.st_mode))
+			{
+				thefiles.push_back(userinput.at(i));
+			}
+		}//there are now 2 vectors, one of files and one of directories, what the fuck now?
 
-	//sort vector of files and directories alphabetically
-	sort(thefiles.begin(), thefiles.end(), less<string>());	
-	cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
-	for(int i = 0; i < thefiles.size(); i++)
-	{
-		cout << thefiles.at(i) << endl;
+		sort(thefiles.begin(), thefiles.end(), less<string>());	
+		cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
+		for(int i = 0; i < thefiles.size(); i++)
+		{
+			cout << thefiles.at(i) << endl;
+		}
+		
+		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
+		cout << "\nthedirs: " << thedirectories.size() << endl;
+		for(int i = 0; i < thedirectories.size(); i++)
+		{
+			cout << thedirectories.at(i) << "----------------------------------------------" << endl;
+		}
 	}
-	
-	
-	sort(thedirectories.begin(), thedirectories.end(), less<string>());	
-	cout << "\nthedirs: " << thedirectories.size() << endl;
-	for(int i = 0; i < thedirectories.size(); i++)
+	else
 	{
-		cout << thedirectories.at(i) << "----------------------------------------------" << endl;
+		checkflags(ishidden, islist, isrecursive, thedot);
+		cout << "\n";
 	}
-	
+/*
+	//else its just ls, possibly with flags
 	//if its just ls
 	if((ishidden && islist && isrecursive) == false)
 	{
@@ -173,7 +167,11 @@ int main(int argc, char **argv)
 			}
 			cout << direntp->d_name << endl; 
 		}
-		closedir(dirp);
+		if(closedir(dirp) == -1)
+			{
+				perror("closedir() error\n");
+				exit(1);
+			}
 	}
 
 	//there is some sort of flag
@@ -185,9 +183,10 @@ int main(int argc, char **argv)
 	{
 		outputhidden(thefiles, thedirectories);
 	}
+*/
 
 	return 0;
-}//end of main()
+}//end of main() -------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------
 void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 {
@@ -231,6 +230,7 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 				}
 				cout << "DIRECTORY :::::" << losdirs.at(i) << endl;
 				cout << direntp->d_name << endl;
+				//right here i want to store the names into a vector of direntp
 			}
 			//closedir(dirp);
 			if(closedir(dirp) == -1)
@@ -243,8 +243,58 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 }//void outputreg()
 void outputhidden(const vector<string> losfiles, const vector<string> losdirs)
 {
+	for(int i = 0; i < losfiles.size(); i++)
+	{
+		if(losfiles.empty()) break;
+		struct stat filebuf;
+
+		if((stat(losfiles.at(i).c_str(), &filebuf)) == -1)
+		{
+			perror("stat() error!\n");
+			exit(1);
+		}
+			cout << "FILES::::::";
+			cout << losfiles.at(i) << endl;
+	}
+
+	for(int i = 0; i < losdirs.size(); i++)
+		{
+			if(losdirs.empty()) break;
+			//errno is set to an obsure number so we know if it changed
+			errno = 25 ;
+			
+			DIR *dirp = opendir(losdirs.at(i).c_str());
+			if(dirp == NULL)
+			{
+				perror("opendir() error\n");
+				exit(1);
+			}
+			dirent *direntp;
+			while((direntp = readdir(dirp)))
+			{
+				if(errno != 25)
+				{
+					perror("readdir() error\n");
+					exit(1);
+				}
+				cout << "HIDDEN DIRECTORY :::::" << losdirs.at(i) << endl;
+				cout << direntp->d_name << endl;
+			}
+			//closedir(dirp);
+			if(closedir(dirp) == -1)
+			{
+				perror("closedir() error\n");
+				exit(1);
+			}
+			cout << "============================" << endl;
+		}
 
 }
+void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
+{
+
+}//void checkflags-------
+
 /*
 void permis(struct stat s)
 {
