@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <time.h>
 
 //#define BLUEDIR "\033[34m";
 #define GREENEXE cout <<"\033[32m";
@@ -93,7 +94,7 @@ int main(int argc, char **argv)
 	if(islist == true) cout << "-l true\n";
 	else cout << "-l false\n";
 	if(isrecursive == true) cout << "-R true\n";
-	else cout << "-R false\n";
+	else cout << "-R false\n----------------------------------\n";
 
 	//first thing in vector will always be executable i.e(./a.out)
 	//this will make vector so it only contains the filenames & directoies
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 
 	//sort vector of files and directories alphabetically
 	sort(thefiles.begin(), thefiles.end(), less<string>());	
-	cout << "\nthefiles: " << thefiles.size() << endl;
+	cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
 	for(int i = 0; i < thefiles.size(); i++)
 	{
 		cout << thefiles.at(i) << endl;
@@ -143,9 +144,39 @@ int main(int argc, char **argv)
 	cout << "\nthedirs: " << thedirectories.size() << endl;
 	for(int i = 0; i < thedirectories.size(); i++)
 	{
-		cout << thedirectories.at(i) << endl;
+		cout << thedirectories.at(i) << "----------------------------------------------" << endl;
+	}
+	
+	//if its just ls
+	if((ishidden && islist && isrecursive) == false)
+	{
+		//setting errno to some obscure value so we know if it changed
+		errno = 99;
+		const char *dirName = ".";
+		DIR *dirp = opendir(dirName);
+		if(dirp == NULL) 
+		{
+			perror("opendir() error\n");
+			exit(1);
+		}
+		dirent *direntp;
+		while ((direntp = readdir(dirp)))
+		{
+			string temp = direntp->d_name;
+			if(temp.at(0)  == '.')
+			continue;
+
+			if(errno != 99)
+			{
+				perror("readdir() error\n");
+				exit(1);
+			}
+			cout << direntp->d_name << endl; 
+		}
+		closedir(dirp);
 	}
 
+	//there is some sort of flag
 	if(ishidden == false)
 	{
 		outputreg(thefiles, thedirectories);
@@ -170,9 +201,8 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 			perror("stat() error!\n");
 			exit(1);
 		}
-			cout << "ayayayay" << endl;	
+			cout << "FILES::::::";
 			cout << losfiles.at(i) << endl;
-			cout << "lololol" << endl;
 	}
 
 	for(int i = 0; i < losdirs.size(); i++)
@@ -180,8 +210,6 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 			if(losdirs.empty()) break;
 			//errno is set to an obsure number so we know if it changed
 			errno = 25 ;
-			//char *dirname;
-			//dirname = losdirs.at(i).c_str();
 			
 			DIR *dirp = opendir(losdirs.at(i).c_str());
 			if(dirp == NULL)
@@ -189,8 +217,6 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 				perror("opendir() error\n");
 				exit(1);
 			}
-//			if((losdirs.at(i)[0].c_str() == '.'))
-	//			continue;
 			dirent *direntp;
 			while((direntp = readdir(dirp)))
 			{
@@ -203,7 +229,7 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 					perror("readdir() error\n");
 					exit(1);
 				}
-				cout << "PPPPPPPPPPPPPP" << losdirs.at(i) << endl;
+				cout << "DIRECTORY :::::" << losdirs.at(i) << endl;
 				cout << direntp->d_name << endl;
 			}
 			//closedir(dirp);
