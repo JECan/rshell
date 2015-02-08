@@ -170,19 +170,9 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 			perror("stat() error!\n");
 			exit(1);
 		}
-//		if(filebuf.st_mode & S_IXUSR)
-//		{
-//			cout << "ayayayay" << endl;	
-//			cout << GREENEXE << losfiles.at(i) << endl;
-//			cout << "lololol" << endl;
-//		}
-//		else
-///		{
 			cout << "ayayayay" << endl;	
 			cout << losfiles.at(i) << endl;
 			cout << "lololol" << endl;
-
-//		}
 	}
 
 	for(int i = 0; i < losdirs.size(); i++)
@@ -199,32 +189,36 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 				perror("opendir() error\n");
 				exit(1);
 			}
-			if((losdirs.at(i) == "./") || (losdirs.at(i) == "../"))
-				continue;
+//			if((losdirs.at(i)[0].c_str() == '.'))
+	//			continue;
 			dirent *direntp;
 			while((direntp = readdir(dirp)))
 			{
+				string temp = direntp->d_name;
+				if(temp.at(0)  == '.')
+				continue;
+
 				if(errno != 25)
 				{
 					perror("readdir() error\n");
 					exit(1);
 				}
+				cout << "PPPPPPPPPPPPPP" << losdirs.at(i) << endl;
 				cout << direntp->d_name << endl;
 			}
-			closedir(dirp);
+			//closedir(dirp);
 			if(closedir(dirp) == -1)
 			{
 				perror("closedir() error\n");
 				exit(1);
 			}
-			cout << "asdfasdfasdf" << endl;
+			cout << "============================" << endl;
 		}
 }//void outputreg()
 void outputhidden(const vector<string> losfiles, const vector<string> losdirs)
 {
 
 }
-
 /*
 void permis(struct stat s)
 {
