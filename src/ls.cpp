@@ -12,6 +12,8 @@
 #include <string>
 #include <iomanip>
 #include <time.h>
+#include <pwd.h>
+#include <grp.h>
 
 //#define BLUEDIR "\033[34m";
 #define GREENEXE "\033[1;32m";
@@ -20,10 +22,10 @@
 //#define DEFAULTCOL "\033[0m";
 using namespace std;
 
-//void permis(struct stat s);
+void permis(const char *thingy);
 void outputreg(const vector<string> losfiles, const vector<string> losdirs);
-void outputhidden(const vector<string> losfiles, const vector<string> losdirs);
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot);
+void outputfile(const bool &dashl, const string &myfiles);
 
 int main(int argc, char **argv)
 {
@@ -73,13 +75,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(ishidden == true) cout << "-a true\n";
-	else cout << "-a false\n";
-	if(islist == true) cout << "-l true\n";
-	else cout << "-l false\n";
-	if(isrecursive == true) cout << "-R true\n";
-	else cout << "-R false\n----------------------------------\n";
-
 	userinput.erase(userinput.begin());
 //	for (int i = 0; i < userinput.size(); i++)
 //	{
@@ -117,6 +112,16 @@ int main(int argc, char **argv)
 			}
 		}//there are now 3 vectors,
 		//just files, just directories, all userinput
+		
+		//we can list files straight up, just determine if -l -a
+		for(int i = 0; i < userinput.size(); i++)
+		{
+			struct stat filelist;
+			if(S_ISREG(filelist.st_mode))
+			{
+				outputfile(islist, userinput.at(i));
+			}
+		}
 
 //		sort(thefiles.begin(), thefiles.end(), less<string>());	
 //		cout << "\nthefiles: " << thefiles.size() << "---------------------------------------" << endl;
@@ -124,7 +129,6 @@ int main(int argc, char **argv)
 //		{
 //			cout << thefiles.at(i) << endl;
 //		}
-//		
 //		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
 //		cout << "\nthedirs: " << thedirectories.size() << endl;
 //		for(int i = 0; i < thedirectories.size(); i++)
@@ -133,19 +137,6 @@ int main(int argc, char **argv)
 //		}
 		
 		//for files, they can just be outputted
-		for(int i = 0; i < thefiles.size(); i++)
-		{
-			struct stat filebuff;
-			if(stat(thefiles.at(i).c_str(), &filebuff) == -1)
-			{
-				perror("stat() error\n");
-				exit(1);
-			}
-//			if(filebuff.st_mode & S_IXUSR)
-//				cout << GREENEXE;
-			cout << left << setw(charlength + 3) << thefiles.at(i)
-					 << endl << endl;
-		}
 
 	}
 	else// naked ls, now determine what flags
@@ -155,6 +146,20 @@ int main(int argc, char **argv)
 	}
 	return 0;
 }//end of main() -------------------------------------------------------------------------------------------
+void outputfile(const bool &dashl, const string &myfiles)
+{
+	//for files we dont care about hidden or recursive
+	//all we want to know if list just filename or properties too?
+	const char* temp = myfiles.c_str();
+
+	if(dashl == false)//if we dont have to list properties, just output file
+	{
+		cout << myfiles << "\t---its working!" << endl;
+	}
+	else//we have to output its properties. 
+		permis(temp);
+}
+
 //------------------------------------------------------------------------
 void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 {
@@ -210,9 +215,6 @@ void outputreg(const vector<string> losfiles, const vector<string> losdirs)
 		}
 */
 }//void outputreg()
-void outputhidden(const vector<string> losfiles, const vector<string> losdirs)
-{
-}
 void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 {
 	//set errno to obbcsure value so we know if it changed
@@ -245,20 +247,25 @@ void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 	//cases: -a, -l, -R, -al, -aR, -lR, -alR
 }//void checkflags-------
 
-/*
-void permis(struct stat s)
+void permis(const char *thingy)
 {
 	struct passwd *mypasswd;
 	struct group *mygroup;
 	struct stat s;
 	string lastedit;
 
+	if((stat(thingy, &s)) == -1)
+	{
+		perror("stat() errorrr\n");
+		exit(5);
+	}
+
 	if(S_ISREG(s.st_mode)) cout << "-";
 	else if(S_ISDIR(s.st_mode)) cout << "d";
 	else if(S_ISCHR(s.st_mode)) cout << "c";
 	else if(S_ISBLK(s.st_mode)) cout << "b";
 	else if(S_ISFIFO(s.st_mode)) cout << "f";
-	else if(S_ISLINK(s.st_mode)) cout << "l";
+	else if(S_ISLNK(s.st_mode)) cout << "l";
 	else if(S_ISSOCK(s.st_mode)) cout << "s";
 	else cout << "?";
 	cout << ((s.st_mode & S_IRUSR) ? "r":"-");
@@ -270,17 +277,16 @@ void permis(struct stat s)
 	cout << ((s.st_mode & S_IROTH) ? "r":"-");
 	cout << ((s.st_mode & S_IWOTH) ? "w":"-");
 	cout << ((s.st_mode & S_IXOTH) ? "x":"-");
-	cout << " ";
 
-	time = ctime(&s.st_mtime);
+	lastedit = ctime(&s.st_mtime);
 	mypasswd = getpwuid(s.st_uid);
 	if(mypasswd == NULL) {perror("getpwuid() error");}
 	mygroup = getgrgid(s.st_gid);
 	if(mygroup == NULL) {perror("getgrgid() error");}
 
-	cout << "   " << statbuf.st_nlink << "   " << mypasswd->pw_name
-	     << "   " << mygroup->gr_name << "   " << lastedit << "   "
-	     << endl;
+	cout << " " << s.st_nlink << " " << mypasswd->pw_name
+	     << " " << mygroup->gr_name << " " <<  s.st_size 
+	     << " " << lastedit << thingy << endl;
 
 }//void permis()
-*/
+
