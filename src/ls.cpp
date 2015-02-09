@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	if(userinput.size() > 0)
 	{
 		sort(userinput.begin(), userinput.end(), alphabet);	
-		int charlength = 1;
+//		int charlength = 1;
 //		for(int i = 0; i < userinput.size(); i++)
 //		{
 //			cout << "user entered: " << userinput.at(i) << endl;
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
 			}
 			if(S_ISREG(determine.st_mode))
 			{
-				if(userinput.at(i).size() > charlength)
-					charlength = userinput.at(i).size();
+//				if(userinput.at(i).size() > charlength)
+//					charlength = userinput.at(i).size();
 				thefiles.push_back(userinput.at(i));
 			}
 		}//there are now 3 vectors,
@@ -310,7 +310,7 @@ void recurse(const bool &dasha, const bool &dashl, const string &mydir)
 	dirent *direntp;
 	//obscure value for errno
 	errno = 23;
-	while(direntp = readdir(dirp))
+	while((direntp = readdir(dirp)))
 	{
 		if(errno != 23)
 		{
@@ -361,7 +361,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 		exit(1);
 	}
 	dirent *direntp;
-	while(direntp = readdir(dirp))
+	while((direntp = readdir(dirp)))
 	{
 		if(errno != 59)
 		{
@@ -394,7 +394,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 	//case 01: hidden false, list true
 	else if((dasha == false) && (dashl == true))
 	{
-		for(int i = 0; i < docheck.size(); i++)
+		for(unsigned i = 0; i < docheck.size(); i++)
 		{
 			if(docheck.at(i).at(0) == '.')
 				continue;
@@ -405,7 +405,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 	//case 10: hidden true, list false
 	else if((dasha == true) && (dashl == false))
 	{
-		for(int i = 0; i < docheck.size(); i++)
+		for(unsigned i = 0; i < docheck.size(); i++)
 		{
 			cout << docheck.at(i) << endl;
 		}
