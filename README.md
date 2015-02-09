@@ -43,3 +43,22 @@ outputs  ```hello world```
 * ```exit``` command does exit program but throws error to execvp().
 
 * error is thrown if host name exceeds 50 characters
+
+ls
+===
+rshell also includes an implementation of the ```ls``` command to download this implementation of ls do the following.
+
+```
+	$ git clone  http://github.com/SpaceCowboy100/rshell.git
+	$ cd rshell
+	$ git checkout hw1
+	$ make
+	$ bin/ls
+```
+ls - Bugs/Limitations
+===
+* ```bin/ls -``` does not throw an error
+
+* There is no support for the ```-R``` flag
+
+* ```bin/ls -l``` of a directory path will output the entire path, instead of just the file or directory.
