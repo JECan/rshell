@@ -18,10 +18,13 @@
 #include <grp.h>
 
 #define TERMINALSZ 72;
-//#define BLUEDIR "\033[34m";
-#define GREENEXE "\033[1;32m";
-#define DEFAULT "\033[0;00m";
-//#define GRAYHIDDEN "\033";
+#define BLUEDIR cout << "\033[34m";
+#define BLUEDIRHID cout <<"\033[1;47;34m";
+#define GREENEXE cout << "\033[1;32m";
+#define GREENEXEHID cout << "\033[1;47;32m";
+#define FITTYSHADES cout << "\033[47;m";
+#define DEFAULT cout << "\033[0;00m";
+
 //#define DEFAULTCOL "\033[0m";
 using namespace std;
 
@@ -56,7 +59,7 @@ int main(int argc, char **argv)
 	{
 		if (count == '?')
 		{
-			perror("getopt() error\n");
+			perror("getopt() error");
 			exit(1);
 		}
 		switch(count)
@@ -125,11 +128,18 @@ int main(int argc, char **argv)
 		for(int i = 0; i < thedirectories.size(); i++)
 		{
 			if(thedirectories.empty()) break;
-	//		if(isrecursive == true)
-	//			recurse();
 			dothedir(ishidden, islist, thedirectories.at(i));
 		}
 
+		//case exclusive to directores as well -R
+		//special case for the recursion flag, input > 1 and -R flag
+		if(isrecursive == true)
+		{
+			for(int i = 0; i < thedirectories.size(); i++)
+			{
+				recurse(ishidden, islist, thedirectories.at(i));
+			}
+		}
 	}
 	else// naked ls, now determine what flags
 	{
@@ -140,16 +150,33 @@ int main(int argc, char **argv)
 	return 0;
 }//end of main() -------------------------------------------------------------------------------------------
 
-
 void outputfile(const bool &dashl, const string &myfiles)
 {
 	//for files we dont care about hidden or recursive
 	//all we want to know if list just filename or properties too?
 	const char* temp = myfiles.c_str();
-
+	bool isexe = false;
+	bool ishid = false;
 	if(dashl == false)//if we dont have to list properties, just output file
 	{
-		cout << left << setw(myfiles.size()+1) << myfiles << endl;
+		//cout << left << setw(myfiles.size()+1) << myfiles << endl;
+		struct stat color;
+		if(stat(myfiles.c_str(), &color) == -1)
+		{
+			perror("stat error");
+			exit(1);
+		}
+		if(S_IXUSR & color.st_mode)
+			isexe = true;
+
+		if(isexe == true)
+		{
+			GREENEXE
+			cout << left << setw(myfiles.size()+1) << myfiles << endl;
+		}
+		else
+			cout << left << setw(myfiles.size()+1) << myfiles << endl;
+
 	}
 	else//we have to output its properties. 
 		permis(temp);
@@ -247,12 +274,84 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		exit(1);
 	}
 }//void dothedir()
-
 void recurse(const bool &dasha, const bool &dashl, const string &mydir)
 {
+	cout << mydir << ":\n";
+/*
+	string recurtemp;
+	vector<string> contents;
+	for(int i = 0; i < dir.size(); i++)
+	{
+		DIR *dirp = opendir(dir.at(i).c_str());
+		if(dirp == NULL)
+		{
+			perror("opendir() recurse errror");
+			exit(1);
+		}
+		dirent *direntp;
+		errno = 89;
+		while(direntp = readdir(dirp));
+		{
+			if(errno != 89)
+			{
+				perror("recursive readdir()error");
+				exit(1);
+			}
+			struct stat recurstat;
+
+		}
+	}
+*/
+	DIR *dirp = opendir(mydir.c_str());
+	if(dirp == NULL)
+	{
+		perror("opendir() recurse error");
+		exit(1);
+	}
+	dirent *direntp;
+	//obscure value for errno
+	errno = 23;
+	while(direntp = readdir(dirp))
+	{
+		if(errno != 23)
+		{
+			perror("readdir() recurse error");
+			exit(1);
+		}
+		
+		struct stat recurstat;
+
+		//case 00: hidden and list false
+		if((dasha == false) && (dashl == false))
+		{
+			dothedir(dasha, dashl, mydir);
+		}
+
+		//case 01: hidden false, list true
+		else if((dasha == false) && (dashl == true))
+		{
+			dothedir(dasha, dashl, mydir);
+		}
+
+		//case 10: hidden true, list false
+		else if((dasha == true) && (dashl == false))
+		{
+			dothedir(dasha, dashl, mydir);
+		}
+
+		//case 11: hidden true, list rue
+		else if((dasha == true) && (dashl == true))
+		{
+			dothedir(dasha, dashl, mydir);
+		}
+	}
+	if(closedir(dirp) == -1)
+	{
+		perror("closedir() error\n");
+		exit(1);
+	}
 
 }//void recurse()
-
 void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 {
 	//set errno to obbcsure value so we know if it changed
@@ -324,7 +423,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 		}
 	}
 
-}//void checkflags-------
+}//void checkflags
 
 void permis(const string &thingy)
 {
@@ -333,6 +432,8 @@ void permis(const string &thingy)
 	struct stat s;
 	string lastedit;
 	int total;
+	bool isexe = false;
+	bool isdir = false;
 
 	if((stat(thingy.c_str(), &s)) == -1)
 	{
@@ -340,7 +441,11 @@ void permis(const string &thingy)
 		exit(1);
 	}
 	if(S_ISREG(s.st_mode)) cout << "-";
-	else if(S_ISDIR(s.st_mode)) cout << "d";
+	else if(S_ISDIR(s.st_mode)) 
+	{
+		isdir = true;
+		cout << "d";
+	}
 	else if(S_ISCHR(s.st_mode)) cout << "c";
 	else if(S_ISBLK(s.st_mode)) cout << "b";
 	else if(S_ISFIFO(s.st_mode)) cout << "f";
@@ -356,6 +461,10 @@ void permis(const string &thingy)
 	cout << ((s.st_mode & S_IROTH) ? "r":"-");
 	cout << ((s.st_mode & S_IWOTH) ? "w":"-");
 	cout << ((s.st_mode & S_IXOTH) ? "x":"-");
+
+	if(s.st_mode & S_IXUSR)
+		isexe = true;
+	
 
 	lastedit = ctime(&s.st_mtime);
 	if(lastedit.at(lastedit.size()-1) == '\n')
@@ -375,9 +484,16 @@ void permis(const string &thingy)
 		 << setw(pwnamecol) << mypasswd->pw_name
 		 << setw(grnamecol) << mygroup->gr_name
 		 << setw(filesizecol) << s.st_size
-		 << setw(timecol) << lastedit << " " << thingy
-		 << endl;
+		 << setw(timecol) << lastedit << " ";
+		 if(isexe == true)
+			GREENEXE;
+		 if(isdir == true)
+		 	 BLUEDIR;
+		 if(thingy.at(0) == '.')
+		 	 FITTYSHADES;
+		 cout << thingy << endl;
 }//void permis()
+
 bool alphabet(const string &alpha, const string &beta)
 {
 	int i = 0;
@@ -394,4 +510,4 @@ bool alphabet(const string &alpha, const string &beta)
 			return false;
 	}
 	return (alpha.size() < beta.size());
-}
+}//bool alphabet()
