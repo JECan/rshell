@@ -24,7 +24,7 @@
 using namespace std;
 
 void permis(const string &thingy);
-void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot);
+void checkflags(const bool &dasha, const bool &dashl, const string &mydot);
 void outputfile(const bool &dashl, const string &myfiles);
 void dothedir(const bool &dasha, const bool &dashl, const string &mydir);
 void recurse(const bool &dasha, const bool &dashl, const string &mydir);
@@ -82,10 +82,10 @@ int main(int argc, char **argv)
 	{
 		sort(userinput.begin(), userinput.end(), less<string>());	
 		int charlength = 1;
-		for(int i = 0; i < userinput.size(); i++)
-		{
-			cout << "user entered: " << userinput.at(i) << endl;
-		}
+//		for(int i = 0; i < userinput.size(); i++)
+//		{
+//			cout << "user entered: " << userinput.at(i) << endl;
+//		}
 		
 		for(int i = 0; i < userinput.size(); i++)
 		{
@@ -118,7 +118,6 @@ int main(int argc, char **argv)
 			}
 		}
 
-
 		//now for directories
 		sort(thedirectories.begin(), thedirectories.end(), less<string>());	
 		for(int i = 0; i < thedirectories.size(); i++)
@@ -130,11 +129,12 @@ int main(int argc, char **argv)
 		}
 
 	}
-//	else// naked ls, now determine what flags
-//	{
-//		checkflags(ishidden, islist, isrecursive, thedot);
-//		cout << endl << endl;
-//	}
+	else// naked ls, now determine what flags
+	{
+		if(isrecursive == false)
+			checkflags(ishidden, islist, thedot);
+		cout << endl;
+	}
 	return 0;
 }//end of main() -------------------------------------------------------------------------------------------
 void outputfile(const bool &dashl, const string &myfiles)
@@ -145,7 +145,7 @@ void outputfile(const bool &dashl, const string &myfiles)
 
 	if(dashl == false)//if we dont have to list properties, just output file
 	{
-		cout << myfiles << "\t---its working!" << endl;
+		cout << myfiles << endl;
 	}
 	else//we have to output its properties. 
 		permis(temp);
@@ -179,7 +179,6 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		}
 
 		//case 00: hidden and list false
-		//WORKS!!!
 		if((dasha == false) && (dashl == false))
 		{
 			dummy = direntp->d_name;
@@ -189,7 +188,6 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		}
 
 		//case 01: hidden false, list true
-		//FIX IT!!!
 		else if((dasha == false) && (dashl == true))
 		{
 			dummy1 = direntp->d_name;	
@@ -197,34 +195,20 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 				continue;
 			vec1.push_back(dummy1);
 			sort(vec1.begin(),vec1.end(), less<string>());
-//			for(int i = 0; i < vec1.size(); i++)
-//			{
-//				permis(dummy1.c_str());
-//			}
 		}
 
 		//case 10: hidden true, list false
-		//WORKS!!!!
 		else if((dasha == true) && (dashl == false))
 		{
 			cout << direntp->d_name << endl;
 		}
 
 		//case 11: hidden true, list rue
-		//FIX IT
 		else if((dasha == true) && (dashl == true))
 		{
 			dummy2 = direntp->d_name;
 			vec2.push_back(dummy2);
-
 			sort(vec2.begin(),vec2.end(), less<string>());
-//			for(int i = 0; i < vec2.size(); i++)
-//			{
-		//		char* temp;
-		//		strcat(temp, "test/");
-		//		strcat(temp, vec2.at(i).c_str());
-		//		permis(temp);
-//			}
 		}
 	}
 
@@ -253,7 +237,6 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 		}
 	}
 
-
 	if(closedir(dirp) == -1)
 	{
 		perror("closedir() error()");
@@ -264,9 +247,9 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 void recurse(const bool &dasha, const bool &dashl, const string &mydir)
 {
 
-}
+}//void recurse()
 
-void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
+void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 {
 	//set errno to obbcsure value so we know if it changed
 	errno = 59;
@@ -296,6 +279,47 @@ void checkflags(bool dasha, bool dashl, bool dashR, const string &mydot)
 	//now do flag check and determine how to output them
 	sort(docheck.begin(),docheck.end(), less<string>());
 	//cases: -a, -l, -R, -al, -aR, -lR, -alR
+	
+	//case 00: hidden and list false
+	if((dasha == false) && (dashl == false))
+	{
+		for(int i = 0; i < docheck.size(); i++)
+		{
+			if(docheck.at(i).at(0) == '.')
+				continue;
+			cout << docheck.at(i) << endl;
+		}
+	}
+
+	//case 01: hidden false, list true
+	else if((dasha == false) && (dashl == true))
+	{
+		for(int i = 0; i < docheck.size(); i++)
+		{
+			if(docheck.at(i).at(0) == '.')
+				continue;
+			permis(docheck.at(i));
+		}
+	}
+
+	//case 10: hidden true, list false
+	else if((dasha == true) && (dashl == false))
+	{
+		for(int i = 0; i < docheck.size(); i++)
+		{
+			cout << docheck.at(i) << endl;
+		}
+	}
+
+	//case 11: hidden true, list rue
+	else if((dasha == true) && (dashl == true))
+	{
+		for(int i = 0; i < docheck.size(); i++)
+		{
+			permis(docheck.at(i));	
+		}
+	}
+
 }//void checkflags-------
 
 void permis(const string &thingy)
@@ -308,7 +332,6 @@ void permis(const string &thingy)
 	if((stat(thingy.c_str(), &s)) == -1)
 	{
 		perror("stat() errorrr\n");
-		cout << "THINGY*****************" << thingy;
 		exit(1);
 	}
 	if(S_ISREG(s.st_mode)) cout << "-";
@@ -330,6 +353,8 @@ void permis(const string &thingy)
 	cout << ((s.st_mode & S_IXOTH) ? "x":"-");
 
 	lastedit = ctime(&s.st_mtime);
+	if(lastedit.at(lastedit.size()-1) == '\n')
+		lastedit.at(lastedit.size()-1) = '\0';
 	mypasswd = getpwuid(s.st_uid);
 	if(mypasswd == NULL) {perror("getpwuid() error");}
 	mygroup = getgrgid(s.st_gid);
@@ -337,6 +362,6 @@ void permis(const string &thingy)
 
 	cout << " " << s.st_nlink << " " << mypasswd->pw_name
 	     << " " << mygroup->gr_name << " " <<  s.st_size 
-	     << " " << lastedit << thingy << endl;
+	     << " " << lastedit << "  " << thingy << endl;
 
 }//void permis()
