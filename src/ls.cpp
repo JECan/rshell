@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 //			cout << "user entered: " << userinput.at(i) << endl;
 //		}
 		
-		for(int i = 0; i < userinput.size(); i++)
+		for(unsigned i = 0; i < userinput.size(); i++)
 		{
 			struct stat determine;
 			if(stat(userinput.at(i).c_str(), &determine) == -1)
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 		//just files, just directories, all userinput
 		
 		//we can list files straight up, just determine if -l -a
-		for(int i = 0; i < userinput.size(); i++)
+		for(unsigned i = 0; i < userinput.size(); i++)
 		{
 			struct stat filelist;
 			if(S_ISREG(filelist.st_mode))
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 
 		//now for directories
 		sort(thedirectories.begin(), thedirectories.end(), alphabet);	
-		for(int i = 0; i < thedirectories.size(); i++)
+		for(unsigned i = 0; i < thedirectories.size(); i++)
 		{
 			if(thedirectories.empty()) break;
 			dothedir(ishidden, islist, thedirectories.at(i));
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 		//special case for the recursion flag, input > 1 and -R flag
 		if(isrecursive == true)
 		{
-			for(int i = 0; i < thedirectories.size(); i++)
+			for(unsigned i = 0; i < thedirectories.size(); i++)
 			{
 				recurse(ishidden, islist, thedirectories.at(i));
 			}
@@ -156,7 +156,6 @@ void outputfile(const bool &dashl, const string &myfiles)
 	//all we want to know if list just filename or properties too?
 	const char* temp = myfiles.c_str();
 	bool isexe = false;
-	bool ishid = false;
 	if(dashl == false)//if we dont have to list properties, just output file
 	{
 		//cout << left << setw(myfiles.size()+1) << myfiles << endl;
@@ -245,7 +244,7 @@ void dothedir(const bool &dasha, const bool &dashl, const string &mydir)
 
 	if((dasha == false) && (dashl == true))
 	{
-		for(int i = 0; i < vec1.size(); i++)
+		for(unsigned i = 0; i < vec1.size(); i++)
 		{
 			string mytemp = mydir;
 			if(mydir.at(mydir.size()-1) != '/')
@@ -319,8 +318,6 @@ void recurse(const bool &dasha, const bool &dashl, const string &mydir)
 			exit(1);
 		}
 		
-		struct stat recurstat;
-
 		//case 00: hidden and list false
 		if((dasha == false) && (dashl == false))
 		{
@@ -386,7 +383,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 	//case 00: hidden and list false
 	if((dasha == false) && (dashl == false))
 	{
-		for(int i = 0; i < docheck.size(); i++)
+		for(unsigned i = 0; i < docheck.size(); i++)
 		{
 			if(docheck.at(i).at(0) == '.')
 				continue;
@@ -417,7 +414,7 @@ void checkflags(const bool &dasha, const bool &dashl, const string &mydot)
 	//case 11: hidden true, list rue
 	else if((dasha == true) && (dashl == true))
 	{
-		for(int i = 0; i < docheck.size(); i++)
+		for(unsigned i = 0; i < docheck.size(); i++)
 		{
 			permis(docheck.at(i));	
 		}
@@ -431,7 +428,6 @@ void permis(const string &thingy)
 	struct group *mygroup;
 	struct stat s;
 	string lastedit;
-	int total;
 	bool isexe = false;
 	bool isdir = false;
 
@@ -496,8 +492,8 @@ void permis(const string &thingy)
 
 bool alphabet(const string &alpha, const string &beta)
 {
-	int i = 0;
-	int j = 0;
+	unsigned i = 0;
+	unsigned j = 0;
 	//if not hidden we must alphabetize
 	if((alpha.size() > 1) && (alpha.at(0) == '.')) i++;
 	if((beta.size() > 1) && (beta.at(0) == '.')) j++;
