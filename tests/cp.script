@@ -1,0 +1,109 @@
+Script started on Mon 09 Feb 2015 01:53:13 PM PST
+~
+jcand003@hammer $ cd CS100/rshell/
+~/CS100/rshell
+jcand003@hammer $ ls -l
+total 40
+drwx------ 2 jcand003 csmajs  4096 Feb  9 13:42 [0m[01;34mbin[0m/
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb  9 13:41 Makefile
+-rw------- 1 jcand003 csmajs  1777 Feb  8 23:00 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb  9 13:49 [01;34msrc[0m/
+drwx------ 2 jcand003 csmajs  4096 Feb  9 13:49 [01;34mtests[0m/
+[m~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/ls Re[KEADME.md ls[K[Ktests/FAKEREADME blah
+stat() error
+: No such file or directory
+~/CS100/rshell
+jcand003@hammer $ bin/ls README.md tests/FAKEREADME blah[1P[1P[4hc[4l[4hp[4l
+Wallclock Time: 0.003604
+User Time: 0
+System Time: 0.001
+Wallclock Time: 0.006383
+User Time: 0
+System Time: 0.003
+Wallclock Time: 0.003325
+User Time: 0
+System Time: 0
+~/CS100/rshell
+jcand003@hammer $ bin/cp README.md tests/FAKEREADME blah[C[C[C[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K/usr/share//dict/[K[K[K[K[K[Kdc[Koct[K[K[Kict//linux.words [K[K[K[K[K[K[K[K[K[K[K[K[Kin[K[Klinux.words  tests//[Kbigfile blah1
+Wallclock Time: 0.745675
+User Time: 0.368943
+System Time: 0.012998
+Wallclock Time: 9.21165
+User Time: 0.626905
+System Time: 6.73298
+Wallclock Time: 0.31354
+User Time: 0
+System Time: 0.008999
+~/CS100/rshell
+jcand003@hammer $ cd tests/
+~/CS100/rshell/tests
+jcand003@hammer $ ls -l
+total 14580
+-rw------- 1 jcand003 csmajs 4953699 Feb  9 13:51 bigfile_1
+-rw------- 1 jcand003 csmajs 4953699 Feb  9 13:51 bigfile_1_2
+-rw------- 1 jcand003 csmajs 4956160 Feb  9 13:51 bigfile_1_2_3
+-rw------- 1 jcand003 csmajs       0 Feb  9 13:49 cp.script
+-rw------- 1 jcand003 csmajs    6459 Jan 23 23:51 exec.script
+-rw------- 1 jcand003 csmajs    1777 Feb  9 13:50 FAKEREADME_1
+-rw------- 1 jcand003 csmajs    1777 Feb  9 13:50 FAKEREADME_1_2
+-rw------- 1 jcand003 csmajs    8192 Feb  9 13:50 FAKEREADME_1_2_3
+-rw------- 1 jcand003 csmajs   11800 Feb  8 23:00 ls.script
+~/CS100/rshell/tests
+jcand003@hammer $ cd ..
+~/CS100/rshell
+jcand003@hammer $ ls
+[0m[01;34mbin[0m/  LICENSE  Makefile  README.md  [01;34msrc[0m/  [01;34mtests[0m/
+[m~/CS100/rshell
+jcand003@hammer $ bin/cp [K Makefile tests/ big[K[K[Kb[K[Kbigfile_1 blah2
+Wallclock Time: 0.004323
+User Time: 0.001
+System Time: 0
+Wallclock Time: 0.003957
+User Time: 0.001
+System Time: 0
+Wallclock Time: 0.003456
+User Time: 0
+System Time: 0
+~/CS100/rshell
+jcand003@hammer $ ls
+[0m[01;34mbin[0m/  LICENSE  Makefile  README.md  [01;34msrc[0m/  [01;34mtests[0m/
+[m~/CS100/rshell
+jcand003@hammer $ cd s[Ktests/
+~/CS100/rshell/tests
+jcand003@hammer $ ls -l
+total 14596
+-rw------- 1 jcand003 csmajs 4953699 Feb  9 13:51 bigfile_1
+-rw------- 1 jcand003 csmajs     445 Feb  9 13:52 bigfile_1_1
+-rw------- 1 jcand003 csmajs     445 Feb  9 13:52 bigfile_1_1_2
+-rw------- 1 jcand003 csmajs    8192 Feb  9 13:52 bigfile_1_1_2_3
+-rw------- 1 jcand003 csmajs 4953699 Feb  9 13:51 bigfile_1_2
+-rw------- 1 jcand003 csmajs 4956160 Feb  9 13:51 bigfile_1_2_3
+-rw------- 1 jcand003 csmajs       0 Feb  9 13:49 cp.script
+-rw------- 1 jcand003 csmajs    6459 Jan 23 23:51 exec.script
+-rw------- 1 jcand003 csmajs    1777 Feb  9 13:50 FAKEREADME_1
+-rw------- 1 jcand003 csmajs    1777 Feb  9 13:50 FAKEREADME_1_2
+-rw------- 1 jcand003 csmajs    8192 Feb  9 13:50 FAKEREADME_1_2_3
+-rw------- 1 jcand003 csmajs   11800 Feb  8 23:00 ls.script
+~/CS100/rshell/tests
+jcand003@hammer $ ec[K[Kcd ..
+~/CS100/rshell
+jcand003@hammer $ ls
+[0m[01;34mbin[0m/  LICENSE  Makefile  README.md  [01;34msrc[0m/  [01;34mtests[0m/
+[m~/CS100/rshell
+jcand003@hammer $ bin/ls [K[K[Kcp l[KLICENSE tse[K[Kests/LICC[KENSECOPY
+Wallclock Time: 0.014534
+User Time: 0
+System Time: 0.000999
+~/CS100/rshell
+jcand003@hammer $ exit
+exit
+
+Script done on Mon 09 Feb 2015 01:57:23 PM PST
