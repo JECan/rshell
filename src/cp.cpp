@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "Timer.h"
+#include "timer.h"
 
 using namespace std;
 
