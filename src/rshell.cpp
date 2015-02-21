@@ -151,6 +151,13 @@ void parse(const string &usercommand, const char specialchar[])
 				perror("error execvp()");
 				exit(1);
 			}
+			//must delete argv
+			int j = 0;
+			for(COMTOKEN::iterator del_iter = etok.begin();
+				del_iter != etok.end(); ++j, ++del_iter)
+				{
+					delete [] argv[j];
+				}
 		}
 		//else we are in parent
 		else
@@ -162,6 +169,7 @@ void parse(const string &usercommand, const char specialchar[])
 				exit(1);
 			}
 		}
+		
 	}
 }//void parse()
 //-------------------------------------------------------------
@@ -197,7 +205,7 @@ void pipes(const string &usercommand)
 	{
 
 	}
-	*/
+	
 	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
 	string rightofpipe = usercommand.substr(usercommand.find("|")+1);
 	char *pipeinput[512];
@@ -261,4 +269,5 @@ void pipes(const string &usercommand)
 	}
 	//must restore stdin
 	dup2 (holdstdin,0);
+	*/
 }//void pipes()
