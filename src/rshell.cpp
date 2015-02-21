@@ -54,7 +54,7 @@ int main()
 
 		//checks for comment '#'
 		string checkcomment = userinput;
-		for(unsigned int i=0; i <= checkcomment.size(); i++)
+		for(unsigned int i=0; i <= checkcomment.size()-1; i++)
 		{
 			if(checkcomment[i] == '#')
 			{
