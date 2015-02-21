@@ -53,9 +53,8 @@ int main()
 		getline(cin, userinput);
 
 		//checks for comment '#'
-		char* checkcomment = new char[userinput.length()+1];
-		strcpy(checkcomment, userinput.c_str());
-		for(unsigned int i=0; i <= strlen(checkcomment); i++)
+		string checkcomment = userinput;
+		for(unsigned int i=0; i <= checkcomment.size(); i++)
 		{
 			if(checkcomment[i] == '#')
 			{
@@ -63,7 +62,6 @@ int main()
 			}
 		}
 		userinput = checkcomment;
-		delete checkcomment;
 
 		//check for special characters ; || &&
 		if(userinput.find("&&") != string::npos)
@@ -96,7 +94,6 @@ int main()
 		{
 			parse(userinput,SEMICOLON);
 		}
-
 
 		//exit check
 		typedef tokenizer<char_separator<char> > EXITTOKEN;
