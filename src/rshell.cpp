@@ -8,14 +8,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <boost/tokenizer.hpp>
-//;) test for commit to redirect branch
-//3rd test
-//ANOITHER TEST FOR COMMIT
+
 using namespace std;
 using namespace boost;
 
 void parse(const string &usercommand, const char specialchar[]);
+void pipes(const string &usercommand);
+void inputredirect(const string &usercommand);
+void outputredirect(const string &usercommand, bool istwobrackets);
 
 int main()
 {	
@@ -72,10 +74,29 @@ int main()
 		{
 			parse(userinput,ORING);
 		}
+		//cheeck for piping and io redirection
+		else if(userinput.find("|") != string::npos)
+		{
+			pipes(userinput);
+		}
+/*		else if(userinput.find("<") != string::npos)
+		{
+			inputredirect(userinput);
+		}
+		else if(userinput.find(">") != string::npos)
+		{
+			outputredirect(userinput, false);
+		}
+		else if(userinput.find(">>") != string::npos)
+		{
+			outputredirect(userinput, true);
+		}
+*/
 		else
 		{
 			parse(userinput,SEMICOLON);
 		}
+
 
 		//exit check
 		typedef tokenizer<char_separator<char> > EXITTOKEN;
@@ -90,7 +111,7 @@ int main()
 	}//while(1)
 	return 0;
 } // end of main
-
+//-------------------------------------------------------------
 void parse(const string &usercommand, const char specialchar[])
 {
 	typedef tokenizer<char_separator<char> > MYTOKENS;
@@ -111,7 +132,7 @@ void parse(const string &usercommand, const char specialchar[])
 		else if(pid == 0)
 		{
 			string dothistoken = *tok_iter;
-			char *argv[100];
+			char *argv[512];
 			int i = 0;
 			typedef tokenizer<char_separator<char> > COMTOKEN;
 			char_separator<char> COMSEPARATOR (" ");
@@ -143,3 +164,101 @@ void parse(const string &usercommand, const char specialchar[])
 		}
 	}
 }//void parse()
+//-------------------------------------------------------------
+void inputredirect(const string &usercommand)
+{
+
+}//void inputredirect()
+//-------------------------------------------------------------
+void outputredirect(const string &usercommand, bool istwobrackets)
+{
+
+}//void outputredirect()
+//-------------------------------------------------------------
+void pipes(const string &usercommand)
+{
+	/*
+	int pipefd[2];
+	int pipefd2[2];
+	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
+	string rightofpipe = usercommand.substr(input.find("|")+1);
+	if(pipe(pipefd) == -1)
+	{
+		perror("pipe() error");
+		exit(1);
+	}
+	int pid = fork();
+	if(pid == -1)
+	{
+		perror("piping fork() error");
+		exit(1);
+	}
+	else if(pid == 0)
+	{
+
+	}
+	*/
+	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
+	string rightofpipe = usercommand.substr(usercommand.find("|")+1);
+	char *pipeinput[512];
+	strcpy(pipeinput, leftofpipe.c_str());
+	int fd[2];
+	
+	if(pipe(fd) == -1)
+	{
+		perror("pipe() error");
+		exit(1);
+	}
+	int pid = fork();
+	if (pid == -1)
+	{
+		perror("piping fork() error");
+		exit(1);
+	}
+	
+	else if(pid == 0)
+	{
+		//in child, write to pipe
+		if(dup2(fd[1], 1) == -1)
+		{
+			perror("dup2() error");
+			exit(1);
+		}
+		if(close(fd[0]) == -1)
+		{
+			perror("close() error");
+			exit(1);
+		}
+		if(execvp(pipeinput[0], pipeinput) == -1)
+		{
+			perror("piping execvp() error");
+			exit(1);
+		}
+	}
+	
+	//now read in from pipe
+	int holdstdin;
+	//changing stdin
+	if((holdstdin = dup(0)) == -1)
+	{
+		perror("piping dup() error");
+		exit(1);
+	}
+	if(dup2(fd[0],0) == -1)
+	{
+		perror("piping dup2() error");
+		exit(1);
+	}
+	if(close(fd[1]) == -1)
+	{
+		perror("piping close() error");
+		exit(1);
+	}
+	if(wait(0) == -1)
+	{
+		perror("piping wait() error");
+		exit(1);
+	}
+	//must restore stdin
+	dup2 (holdstdin,0);
+}//void pipes()
