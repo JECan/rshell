@@ -81,13 +81,13 @@ int main()
 			inputredirect(userinput);
 		}
 */
-		else if(userinput.find(">") != string::npos)
-		{
-			outputtrunc(userinput);
-		}
 		else if(userinput.find(">>") != string::npos)
 		{
 			outputappend(userinput);
+		}
+		else if(userinput.find(">") != string::npos)
+		{
+			outputtrunc(userinput);
 		}
 		else
 		{
@@ -181,7 +181,7 @@ void outputappend(const string &usercommand)
 	int flags = O_CREAT | O_WRONLY | O_APPEND;
 	int carrotloc = usercommand.find(carrot);
 	string leftofout = usercommand.substr(0, carrotloc);
-	string rightofout = usercommand.substr(usercommand.find(carrot) + 1);
+	string rightofout = usercommand.substr(usercommand.find(carrot) + 2);
 	
 	if(rightofout == "")
 	{
@@ -196,8 +196,8 @@ void outputappend(const string &usercommand)
 	MYTOKENS::iterator tok_iter = tok.begin();
 
 	//open the file
-	int writeto = open((*tok_iter).c_str(), flags, 0666);
-	if(writeto == -1)
+	int writeto;
+	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
 	{
 		perror("open() error");
 		return;
@@ -293,8 +293,8 @@ void outputtrunc(const string &usercommand)
 	MYTOKENS::iterator tok_iter = tok.begin();
 
 	//open the file
-	int writeto = open((*tok_iter).c_str(), flags, 0666);
-	if(writeto == -1)
+	int writeto;
+	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
 	{
 		perror("open() error");
 		return;
