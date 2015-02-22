@@ -172,7 +172,93 @@ void parse(const string &usercommand, const char specialchar[])
 //-------------------------------------------------------------
 void inputredirect(const string &usercommand)
 {
-		
+	string carrot = "<";
+	int flags = O_RDONLY;
+	int fd2[2];
+	int carrotloc = usercommand.find(carrot);
+	string leftofin = usercommand.substr(0, carrotloc);
+	string rightofin = usercommand.substr(usercommand.find(carrot) + 2);
+	string cpyright = rightofin;
+	if((leftofin == "") || (rightofin == ""))
+	{
+		cout << "There is no file entered\n";
+		return;
+	}
+
+	//tokenize right side for spaces
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(" ");
+	MYTOKENS tok(rightofin, MYSEPARATOR);
+	MYTOKENS::iterator tok_iter = tok.begin();
+	//open the file
+	int searchthis;
+	if((searchthis = open((*tok_iter).c_str(), flags)) == -1)
+	{
+		perror("open() error");
+		return;
+	}
+
+	//saving std out 
+	int savestdout = dup(1);
+	if(savestdout == -1)
+	{
+		perror("dup() error, output redirection");
+		exit(1);
+	}
+	//setting writeto to the new stdout
+	//must restore stdout later
+	if(dup2(searchthis, 1) == -1)
+	{
+		perror("dup2() error, output redirection");
+		exit(1);
+	}
+	//closing writeto
+	if (close(searchthis) == -1)
+	{
+		perror("close() error, output redirection");
+		exit(1);
+	}
+
+	//parsing left side for spaces, and calliing execvp on leftside
+	char *argv[2];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofin, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv[i] = new char[(*com_iter).size()];
+		strcpy(argv[i],(*com_iter).c_str());
+	}
+	//only want first command, if argv i != NULL then error is thrown	
+	argv[i] = NULL;
+	if(execvp(argv[0],argv) == -1)
+	{
+		perror("error execvp()");
+		exit(1);
+	}
+
+	//restoring stdout
+	if(dup2(savestdout, 1) == -1)
+	{
+		perror("dup2 error restoring");
+//		exit(1);
+	}
+	//closing savestdout
+	if(close(savestdout) == -1)
+	{
+		perror("colse() error");
+//		exit(1);
+	}
+	//must delete argv
+	int j = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+	del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
 }//void inputredirect()
 //-------------------------------------------------------------
 void outputappend(const string &usercommand)
@@ -182,11 +268,10 @@ void outputappend(const string &usercommand)
 	int carrotloc = usercommand.find(carrot);
 	string leftofout = usercommand.substr(0, carrotloc);
 	string rightofout = usercommand.substr(usercommand.find(carrot) + 2);
-	
-	if(rightofout == "")
+	if((leftofout == "") || (rightofout == ""))
 	{
-		cout << "There is no file entered\n";
-		exit(1);
+		cout << "Invalid entry\n";
+		return;	
 	}
 
 	//tokenize right side for spaces
@@ -194,7 +279,6 @@ void outputappend(const string &usercommand)
 	char_separator<char> MYSEPARATOR(" ");
 	MYTOKENS tok(rightofout, MYSEPARATOR);
 	MYTOKENS::iterator tok_iter = tok.begin();
-
 	//open the file
 	int writeto;
 	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
@@ -202,7 +286,6 @@ void outputappend(const string &usercommand)
 		perror("open() error");
 		return;
 	}
-	
 	//saving std out 
 	int savestdout = dup(1);
 	if(savestdout == -1)
@@ -210,7 +293,6 @@ void outputappend(const string &usercommand)
 		perror("dup() error, output redirection");
 		exit(1);
 	}
-
 	//setting writeto to the new stdout
 	//must restore stdout later
 	if(dup2(writeto, 1) == -1)
@@ -218,7 +300,6 @@ void outputappend(const string &usercommand)
 		perror("dup2() error, output redirection");
 		exit(1);
 	}
-
 	//closing writeto
 	if (close(writeto) == -1)
 	{
@@ -253,23 +334,19 @@ void outputappend(const string &usercommand)
 		perror("dup2 error restoring");
 //		exit(1);
 	}
-
 	//closing savestdout
 	if(close(savestdout) == -1)
 	{
 		perror("colse() error");
 //		exit(1);
 	}
-
 	//must delete argv
 	int j = 0;
 	for(COMTOKEN::iterator del_iter = etok.begin();
-		del_iter != etok.end(); j++, del_iter++)
-		{
-			delete [] argv[j];
-		}
-
-
+	del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
 }//void outputappend()
 //-------------------------------------------------------------
 void outputtrunc(const string &usercommand)
@@ -279,11 +356,10 @@ void outputtrunc(const string &usercommand)
 	int carrotloc = usercommand.find(carrot);
 	string leftofout = usercommand.substr(0, carrotloc);
 	string rightofout = usercommand.substr(usercommand.find(carrot) + 1);
-	
-	if(rightofout == "")
+	if((leftofout == "") || (rightofout == ""))
 	{
-		cout << "There is no file entered\n";
-		exit(1);
+		cout << "Invalid entry\n";
+		return;
 	}
 
 	//tokenize right side for spaces
@@ -291,7 +367,6 @@ void outputtrunc(const string &usercommand)
 	char_separator<char> MYSEPARATOR(" ");
 	MYTOKENS tok(rightofout, MYSEPARATOR);
 	MYTOKENS::iterator tok_iter = tok.begin();
-
 	//open the file
 	int writeto;
 	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
@@ -299,7 +374,6 @@ void outputtrunc(const string &usercommand)
 		perror("open() error");
 		return;
 	}
-	
 	//saving std out 
 	int savestdout = dup(1);
 	if(savestdout == -1)
@@ -307,7 +381,6 @@ void outputtrunc(const string &usercommand)
 		perror("dup() error, output redirection");
 		exit(1);
 	}
-
 	//setting writeto to the new stdout
 	//must restore stdout later
 	if(dup2(writeto, 1) == -1)
@@ -315,7 +388,6 @@ void outputtrunc(const string &usercommand)
 		perror("dup2() error, output redirection");
 		exit(1);
 	}
-
 	//closing writeto
 	if (close(writeto) == -1)
 	{
@@ -350,24 +422,20 @@ void outputtrunc(const string &usercommand)
 		perror("dup2 error restoring");
 //		exit(1);
 	}
-
 	//closing savestdout
 	if(close(savestdout) == -1)
 	{
 		perror("colse() error");
 //		exit(1);
 	}
-
 	//must delete argv
 	int j = 0;
 	for(COMTOKEN::iterator del_iter = etok.begin();
 		del_iter != etok.end(); j++, del_iter++)
-		{
-			delete [] argv[j];
-		}
-
+	{
+		delete [] argv[j];
+	}
 }//void outputtrunc()
-//-------------------------------------------------------------
 //-------------------------------------------------------------
 void pipes(const string &usercommand)
 {
