@@ -484,100 +484,25 @@ void splitpipes(const string &usercommand)
 //-------------------------------------------------------------
 void dopipes(char **argv1, char **argv2)
 {
-//from syscall tutorial
-/*	const int PIPE_READ = 0; 
-	const int PIPE_WRITE = 1;
 	int fd[2];
-	if(pipe(fd) == -1)
-		perror("pipe() error");
-	
-	int pid = fork();
-	if(pid == -1)
-	{
-		perror("piping fork() error");
-		exit(1);
-	}
-
-	else if(pid == 0)//child process
-	{
-		cout << "FIRST CHILD PROCESS";
-		if(dup2(fd[PIPE_WRITE],1) == -1)
-			perror("piping dup2() error");
-		if(close(fd[PIPE_READ]) == -1)
-			perror("piping close() error");
-		if((execvp(argv1[0], argv1)) == -1);
-		{	
-			perror("Epiping execvp() error");
-		}
-		exit(1);//prevent zombies
-	}
-
-	else if (pid >0)//first parent function
-	{
-if((wait(0)) == -1)
-			perror("piping wait() error");
-		
-
-		int savestdin;
-		if((savestdin = dup(0)) == -1)
-			perror("piping dup() error");
-		
-		int pid2 = fork();
-		if(pid2 == -1)
-		{
-			perror("piping fork() error");
-			exit(1);
-		}
-
-		else if(pid2 == 0)//second child process
-		{
-			cout << "SECOND CHILD PROCESS";
-
-			if((dup2(fd[PIPE_READ],0)) == -1 )
-				perror("dup2() error");
-			if((close(fd[PIPE_WRITE])) == -1)
-				perror("close() error");
-
-			if((execvp(argv2[0], argv2)) == -1)
-				perror("execvp() argv2 error");
-			exit(1);
-		}
-		else if(pid2 > 0)
-		{
-			if((wait(0)) == -1)
-				perror("wait() error");
-		}
-		if((dup2(savestdin,0)) == -1)
-		perror("error with dup2()");
-
-	}
-//	if((dup2(savestdin,0)) == -1)
-//		perror("error with dup2()");
-*/
-	int fd[2];
-	//int fd2[2];
 	if(pipe(fd) == -1)
 	{
 		perror("Apipe() error");
-//		exit(1);
 	}
 	int pid = fork();
 	if(pid == -1)
 	{
 		perror("Bpiping fork() error");
-//		exit(1);
 	}
 	else if(pid == 0)
 	{
 		if(close(fd[0]) == -1)
 		{
 			perror("Dpiping close() error");
-//			exit(1);
 		}
 		if(dup2(fd[1],1) == -1)
 		{
 			perror("Cpiping dup2() error");
-//			exit(1);
 		}
 		if(execvp(argv1[0], argv1));
 		{	
@@ -587,8 +512,6 @@ if((wait(0)) == -1)
 	}
 	else
 	{
-	//	int holdstdin;
-//		int parentstatus;
 		if(wait(0) == -1)
 		{
 			perror("Fpiping wait() error");
@@ -614,9 +537,6 @@ if((wait(0)) == -1)
 			exit(1);
 		}
 	}
-//	if(close(0) == -1)
-//		perror("closeasdf");
-
 	string str(argv2[0]);
 	splitpipes(str);
 }//void dopipes()
