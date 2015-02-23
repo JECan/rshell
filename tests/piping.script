@@ -1,0 +1,388 @@
+Script started on Sun 22 Feb 2015 10:49:16 PM PST
+~
+jcand003@hammer $ cd CS100/rshell
+~/CS100/rshell
+jcand003@hammer $ #now beginning tests, I must note that whenever i execute an IO  command i must call make again, everytime
+~/CS100/rshell
+jcand003@hammer $ #testing >
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin /[K[K/rshell
+jcand003@hammer$ cat overwrite.txt
+i will overwrite this file using >
+lolol
+jcand003@hammer$ ls -l > overwrite.txt
+~/CS100/rshell
+jcand003@hammer $ cat overwrite.txt
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs     0 Feb 22 22:46 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+~/CS100/rshell
+jcand003@hammer $ #successfully overwritten
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ cat 123.txt
+123
+123
+123
+jcand003@hammer$ cat 123.txt > overwrite.x txt
+~/CS100/rshell
+jcand003@hammer $ cat overwrite.txt
+123
+123
+123
+~/CS100/rshell
+jcand003@hammer $ #successfully overwritten
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ echo lol >
+Invalid entry
+jcand003@hammer$ > overwrite.txt
+Invalid entry
+jcand003@hammer$ >
+Invalid entry
+jcand003@hammer$ #no     cat append.txt
+this file will be used to test >>
+i will now append this file...
+jcand003@hammer$ ls -l >> append.txt
+~/CS100/rshell
+jcand003@hammer $ cat append.txt
+this file will be used to test >>
+i will now append this file...
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:47 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:47 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+~/CS100/rshell
+jcand003@hammer $ #successfully appended
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ vin[K[K[Kbin/rshell
+jcand003@hammer$ cat overwrite.txt
+123
+123
+123
+jcand003@hammer$ cat overwrite.txt >> append.txt
+~/CS100/rshell
+jcand003@hammer $ ct[Kat append.txt
+this file will be used to test >>
+i will now append this file...
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:47 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:47 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+123
+123
+123
+~/CS100/rshell
+jcand003@hammer $ #successfully overwrit[K[K[K[K[K[K[Ka[K[Kappended
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ cat 123.txt
+123
+123
+123
+jcand003@hammer$ cat 123.txt >> doens  sntexist.txt
+~/CS100/rshell
+jcand003@hammer $ cat doesntexist.txt
+123
+123
+123
+~/CS100/rshell
+jcand003@hammer $ #now will test <
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin /[K[K/rshell
+jcand003@hammer$ cat input.txt
+this will be used to test <
+
+123
+12
+1
+abc
+ab
+a
+this is line9
+this is line10
+this is line11
+jcand003@hammer$ cat < input.txt
+this will be used to test <
+
+123
+12
+1
+abc
+ab
+a
+this is line9
+this is line10
+this is line11
+~/CS100/rshell
+jcand003@hammer $ grep 1 < input.txt
+123
+12
+1
+this is line10
+this is line11
+~/CS100/rshell
+jcand003@hammer $ grep line <inpu[Kut.txt
+this is line9
+this is line10
+this is line11
+~/CS100/rshell
+jcand003@hammer $ grep lol << makeithappen.txt
+loop $ 
+loop $ 
+loop $ 
+loop $ ^C
+~/CS100/rshell
+jcand003@hammer $ #[K#accd[Ke[Kidentally used bash script[K[K[K[K[K[K
+~/CS100/rshell
+jcand003@hammer $ #will retest <
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rhsell[K[K[K[K[Kshell
+jcand003@hammer$ grep 1 < input.txt
+123
+12
+1
+this is line10
+this is line11
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ cat < input.txt <input.txt
+this will be used to test <
+
+123
+12
+1
+abc
+ab
+a
+this is line9
+this is line10
+this is line11
+~/CS100/rshell
+jcand003@hammer $ #will test for whitespaces
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ echo append.t             cat append.txt
+this file will be used to test >>
+i will now append this file...
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:47 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:47 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+123
+123
+123
+jcand003@hammer$ echo lul >> appe          append.txt
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ cat s append.txt
+this file will be used to test >>
+i will now append this file...
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:47 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:47 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+123
+123
+123
+lul
+jcand003@hammer$ echo YOLO    >>    append.txt
+~/CS100/rshell
+jcand003@hammer $ cat append.txt
+this file will be used to test >>
+i will now append this file...
+total 52
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:44 123.txt
+-rw------- 1 jcand003 csmajs    65 Feb 22 20:56 append.txt
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:47 bin
+-rw------- 1 jcand003 csmajs    91 Feb 22 20:58 input.txt
+-rw------- 1 jcand003 csmajs 18027 Jan 19 13:53 LICENSE
+-rw------- 1 jcand003 csmajs   445 Feb 16 14:30 Makefile
+-rw------- 1 jcand003 csmajs    12 Feb 22 22:47 overwrite.txt
+-rw------- 1 jcand003 csmajs  1912 Feb 22 22:26 README.md
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:35 src
+drwx------ 2 jcand003 csmajs  4096 Feb 22 22:45 tests
+-rw------- 1 jcand003 csmajs   245 Feb 22 21:14 test.txt
+123
+123
+123
+lul
+YOLO
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ echo YOLO    >>  overwrite.txt
+~/CS100/rshell
+jcand003@hammer $ cat overwrite.txt
+YOLO
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+jcand003@hammer$ echo SWAG            >            overwrite.txt
+~/CS100/rshell
+jcand003@hammer $ cat overwrite.txt
+SWAG
+~/CS100/rshell
+jcand003@hammer $ #piping fails for all caes[K[Kses because perrr[Kors are thrown
+~/CS100/rshell
+jcand003@hammer $ #however the correct oup[Ktput can be displayed in cs[K[Ksome cases
+~/CS100/rshell
+jcand003@hammer $ #no chaing [K[King together commands of pipes with < >> >
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ c[Kbin/rshell
+jcand003@hammer$ cat test.txt
+this is line 1
+this is line 2
+this is line 3
+this is line 4
+this is line 5
+this is line 6
+this is line 7
+this is line 8
+this is line 9
+this is line 10
+this is line 11
+this is line 12
+this is line 13
+this is line 14
+this is line 15
+line 16. DONE
+jcand003@hammer$ cat test.txt | tail
+Apipe() error: Too many open files
+Dpiping close() error: Bad file descriptor
+Cpiping dup2() error: Bad file descriptor
+this is line 7
+this is line 8
+this is line 9
+this is line 10
+this is line 11
+this is line 12
+this is line 13
+this is line 14
+this is line 15
+line 16. DONE
+Hpiping dup2() error: Bad file descriptor
+~/CS100/rshell
+jcand003@hammer $ #correct output however error is thrown
+~/CS100/rshell
+jcand003@hammer $ exit
+exit
+
+Script done on Sun 22 Feb 2015 11:03:07 PM PST

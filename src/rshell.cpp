@@ -8,19 +8,23 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <boost/tokenizer.hpp>
-//;) test for commit to redirect branch
-//3rd test
-//ANOITHER TEST FOR COMMIT
+
 using namespace std;
 using namespace boost;
 
 void parse(const string &usercommand, const char specialchar[]);
+void inputredirect(const string &usercommand);
+void outputappend(const string &usercommand);
+void outputtrunc(const string &usercommand);
+void splitpipes(const string &usercommand);
+void dopipes(char **argv1, char **argv2);
 
 int main()
 {	
 	//obtaining username and hostname
-	char host[50] = {0};
+	char host[64] = {0};
 	string displayuser;
 	string userinput;
 
@@ -35,7 +39,7 @@ int main()
 		perror("gethostname() error.");
 	}
 
-	for(int i = 0; i < 50; i++)
+	for(int i = 0; i < 64; i++)
 	{
 		if(host[i] == '.') host[i] = '\0';
 	}
@@ -44,16 +48,14 @@ int main()
 	char SEMICOLON[] = ";";
 	char ANDING[] = "&&";
 	char ORING[] = "||";
-
 	while(1)
 	{
 		cout << displayuser;
 		getline(cin, userinput);
 
 		//checks for comment '#'
-		char* checkcomment = new char[userinput.length()+1];
-		strcpy(checkcomment, userinput.c_str());
-		for(unsigned int i=0; i <= strlen(checkcomment); i++)
+		string checkcomment = userinput;
+		for(unsigned int i=0; i <= checkcomment.size()-1; i++)
 		{
 			if(checkcomment[i] == '#')
 			{
@@ -61,8 +63,6 @@ int main()
 			}
 		}
 		userinput = checkcomment;
-		delete checkcomment;
-
 		//check for special characters ; || &&
 		if(userinput.find("&&") != string::npos)
 		{
@@ -72,33 +72,48 @@ int main()
 		{
 			parse(userinput,ORING);
 		}
+		//cheeck for piping and io redirection
+		else if(userinput.find("|") != string::npos)
+		{
+			splitpipes(userinput);
+		}
+		else if(userinput.find("<") != string::npos)
+		{
+			inputredirect(userinput);
+		}
+		else if(userinput.find(">>") != string::npos)
+		{
+			outputappend(userinput);
+		}
+		else if(userinput.find(">") != string::npos)
+		{
+			outputtrunc(userinput);
+		}
 		else
 		{
 			parse(userinput,SEMICOLON);
 		}
-
 		//exit check
 		typedef tokenizer<char_separator<char> > EXITTOKEN;
 		char_separator<char> EXITSEPARATOR (" ");
 		EXITTOKEN etok(userinput, EXITSEPARATOR);
 		for(EXITTOKEN::iterator exit_iter = etok.begin();
-			exit_iter != etok.end(); ++exit_iter)
+			exit_iter != etok.end(); exit_iter++)
 		{
 			if(*exit_iter == "exit") exit(EXIT_SUCCESS);
 		}
-
 	}//while(1)
 	return 0;
 } // end of main
-
+//-------------------------------------------------------------
 void parse(const string &usercommand, const char specialchar[])
 {
 	typedef tokenizer<char_separator<char> > MYTOKENS;
 	char_separator<char> MYSEPARATOR(specialchar);
-
 	MYTOKENS tok(usercommand, MYSEPARATOR);
+	string dothistoken;
 	for(MYTOKENS::iterator tok_iter = tok.begin();
-		tok_iter != tok.end(); ++tok_iter)
+		tok_iter != tok.end(); tok_iter++)
 	{
 		int pid = fork();
 		//if pid == -1 throw error
@@ -110,15 +125,15 @@ void parse(const string &usercommand, const char specialchar[])
 		//else if pid == 0 were in child
 		else if(pid == 0)
 		{
-			string dothistoken = *tok_iter;
-			char *argv[100];
+			dothistoken = *tok_iter;
+			char *argv[512];
 			int i = 0;
 			typedef tokenizer<char_separator<char> > COMTOKEN;
 			char_separator<char> COMSEPARATOR (" ");
 			COMTOKEN etok(dothistoken, COMSEPARATOR);
 
 			for(COMTOKEN::iterator com_iter = etok.begin();
-				com_iter != etok.end(); ++i, ++com_iter)
+				com_iter != etok.end(); i++, com_iter++)
 			{
 				argv[i] = new char[(*com_iter).size()];
 				strcpy(argv[i],(*com_iter).c_str());
@@ -130,6 +145,14 @@ void parse(const string &usercommand, const char specialchar[])
 				perror("error execvp()");
 				exit(1);
 			}
+			//must delete argv
+			int j = 0;
+			for(COMTOKEN::iterator del_iter = etok.begin();
+				del_iter != etok.end(); j++, del_iter++)
+				{
+					delete [] argv[j];
+				}
+
 		}
 		//else we are in parent
 		else
@@ -143,3 +166,377 @@ void parse(const string &usercommand, const char specialchar[])
 		}
 	}
 }//void parse()
+//-------------------------------------------------------------
+void inputredirect(const string &usercommand)
+{
+	string carrot = "<";
+	int flags = O_RDONLY;
+	int carrotloc = usercommand.find(carrot);
+	string leftofin = usercommand.substr(0, carrotloc);
+	string rightofin = usercommand.substr(usercommand.find(carrot) + 2);
+	string cpyright = rightofin;
+	if((leftofin == "") || (rightofin == ""))
+	{
+		cout << "Invalid input\n";
+		return;
+	}
+
+	//tokenize right side for spaces
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(" ");
+	MYTOKENS tok(rightofin, MYSEPARATOR);
+	MYTOKENS::iterator tok_iter = tok.begin();
+	//open the file
+	int searchthis;
+	if((searchthis = open((*tok_iter).c_str(), flags)) == -1)
+	{
+		perror("open() error");
+		return;
+	}
+
+	//saving std out 
+	int savestdout = dup(0);
+	if(savestdout == -1)
+	{
+		perror("dup() error, output redirection");
+		exit(1);
+	}
+	//setting writeto to the new stdout
+	//must restore stdout later
+	if(dup2(searchthis, 0) == -1)
+	{
+		perror("dup2() error, output redirection");
+		exit(1);
+	}
+	//closing writeto
+	if (close(searchthis) == -1)
+	{
+		perror("close() error, output redirection");
+		exit(1);
+	}
+
+	//parsing left side for spaces, and calliing execvp on leftside
+	char *argv[2];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofin, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv[i] = new char[(*com_iter).size()];
+		strcpy(argv[i],(*com_iter).c_str());
+	}
+	//only want first command, if argv i != NULL then error is thrown	
+	argv[i] = NULL;
+	if(execvp(argv[0],argv) == -1)
+	{
+		perror("error execvp()");
+		exit(1);
+	}
+
+	//restoring stdout
+	if(dup2(savestdout, 1) == -1)
+	{
+		perror("dup2 error restoring");
+	}
+	//closing savestdout
+	if(close(savestdout) == -1)
+	{
+		perror("colse() error");
+	}
+	//must delete argv
+	int j = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+	del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
+}//void inputredirect()
+//-------------------------------------------------------------
+void outputappend(const string &usercommand)
+{
+	string carrot = ">>";
+	int flags = O_CREAT | O_WRONLY | O_APPEND;
+	int carrotloc = usercommand.find(carrot);
+	string leftofout = usercommand.substr(0, carrotloc);
+	string rightofout = usercommand.substr(usercommand.find(carrot) + 2);
+	if((leftofout == "") || (rightofout == ""))
+	{
+		cout << "Invalid entry\n";
+		return;	
+	}
+
+	//tokenize right side for spaces
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(" ");
+	MYTOKENS tok(rightofout, MYSEPARATOR);
+	MYTOKENS::iterator tok_iter = tok.begin();
+	//open the file
+	int writeto;
+	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
+	{
+		perror("open() error");
+		return;
+	}
+	//saving std out 
+	int savestdout = dup(1);
+	if(savestdout == -1)
+	{
+		perror("dup() error, output redirection");
+		exit(1);
+	}
+	//setting writeto to the new stdout
+	//must restore stdout later
+	if(dup2(writeto, 1) == -1)
+	{
+		perror("dup2() error, output redirection");
+		exit(1);
+	}
+	//closing writeto
+	if (close(writeto) == -1)
+	{
+		perror("close() error, output redirection");
+		exit(1);
+	}
+
+	//parsing left side for spaces, and calliing execvp on leftside
+	char *argv[2];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofout, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv[i] = new char[(*com_iter).size()];
+		strcpy(argv[i],(*com_iter).c_str());
+	}
+	//only want first command, if argv i != NULL then error is thrown	
+	argv[i] = NULL;
+	if(execvp(argv[0],argv) == -1)
+	{
+		perror("error execvp()");
+		exit(1);
+	}
+
+	//restoring stdout
+	if(dup2(savestdout, 1) == -1)
+	{
+		perror("dup2 error restoring");
+	}
+	//closing savestdout
+	if(close(savestdout) == -1)
+	{
+		perror("colse() error");
+	}
+	//must delete argv
+	int j = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+	del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
+}//void outputappend()
+//-------------------------------------------------------------
+void outputtrunc(const string &usercommand)
+{
+	string carrot = ">";
+	int flags = O_CREAT | O_WRONLY | O_TRUNC;
+	int carrotloc = usercommand.find(carrot);
+	string leftofout = usercommand.substr(0, carrotloc);
+	string rightofout = usercommand.substr(usercommand.find(carrot) + 1);
+	if((leftofout == "") || (rightofout == ""))
+	{
+		cout << "Invalid entry\n";
+		return;
+	}
+
+	//tokenize right side for spaces
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(" ");
+	MYTOKENS tok(rightofout, MYSEPARATOR);
+	MYTOKENS::iterator tok_iter = tok.begin();
+	//open the file
+	int writeto;
+	if((writeto = open((*tok_iter).c_str(), flags, 0666)) == -1)
+	{
+		perror("open() error");
+		return;
+	}
+	//saving std out 
+	int savestdout = dup(1);
+	if(savestdout == -1)
+	{
+		perror("dup() error, output redirection");
+		exit(1);
+	}
+	//setting writeto to the new stdout
+	//must restore stdout later
+	if(dup2(writeto, 1) == -1)
+	{
+		perror("dup2() error, output redirection");
+		exit(1);
+	}
+	//closing writeto
+	if (close(writeto) == -1)
+	{
+		perror("close() error, output redirection");
+		exit(1);
+	}
+
+	//parsing left side for spaces, and calliing execvp on leftside
+	char *argv[1];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofout, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv[i] = new char[(*com_iter).size()];
+		strcpy(argv[i],(*com_iter).c_str());
+	}
+	//only want first command, if argv i != NULL then error is thrown	
+	argv[i] = NULL;
+	if(execvp(argv[0],argv) == -1)
+	{
+		perror("error execvp()");
+		exit(1);
+	}
+
+	//restoring stdout
+	if(dup2(savestdout, 1) == -1)
+	{
+		perror("dup2 error restoring");
+	}
+	//closing savestdout
+	if(close(savestdout) == -1)
+	{
+		perror("colse() error");
+	}
+	//must delete argv
+	int j = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+		del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
+}//void outputtrunc()
+//-------------------------------------------------------------
+void splitpipes(const string &usercommand)
+{
+	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
+	string rightofpipe = usercommand.substr(usercommand.find("|")+1);
+	if(!usercommand.find("|"))
+	{
+		return;
+	}
+	if(rightofpipe == "")
+	{
+		return;
+	}
+
+	char *argv1[512];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofpipe, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv1[i] = new char[(*com_iter).size()];
+		strcpy(argv1[i],(*com_iter).c_str());
+	}
+//+++++++++++++++++++++=	
+	char *argv2[512];
+	int j = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN2;
+	char_separator<char> COMSEPARATOR2 (" ");
+	COMTOKEN2 etok2(rightofpipe, COMSEPARATOR2);
+
+	for(COMTOKEN2::iterator com_iter2 = etok2.begin();
+		com_iter2 != etok2.end(); j++, com_iter2++)
+	{
+		argv2[j] = new char[(*com_iter2).size()];
+		strcpy(argv2[j],(*com_iter2).c_str());
+	}
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	dopipes(argv1, argv2);
+	//must delete argv
+	int k = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+		del_iter != etok.end(); k++, del_iter++)
+	{
+		delete [] argv1[k];
+	}
+	int l = 0;
+	for(COMTOKEN2::iterator del_iter2 = etok2.begin();
+		del_iter2 != etok2.end(); l++, del_iter2++)
+	{
+		delete [] argv2[l];
+	}
+}//void splitpipes()
+//-------------------------------------------------------------
+void dopipes(char **argv1, char **argv2)
+{
+	int fd[2];
+	if(pipe(fd) == -1)
+	{
+		perror("Apipe() error");
+	}
+	int pid = fork();
+	if(pid == -1)
+	{
+		perror("Bpiping fork() error");
+	}
+	else if(pid == 0)
+	{
+		if(close(fd[0]) == -1)
+		{
+			perror("Dpiping close() error");
+		}
+		if(dup2(fd[1],1) == -1)
+		{
+			perror("Cpiping dup2() error");
+		}
+		if(execvp(argv1[0], argv1));
+		{	
+			perror("Epiping execvp() error");
+			exit(1);
+		}
+	}
+	else
+	{
+		if(wait(0) == -1)
+		{
+			perror("Fpiping wait() error");
+			exit(1);
+		}
+		int holdstdin;
+		if((holdstdin = dup(0)) == -1)
+		{
+			perror("Gpiping dup() error");
+			exit(1);
+		}
+		
+		
+		if(dup2(fd[0],0) == -1)
+		{
+			perror("Hpiping dup2() error");
+			exit(1);
+		}
+
+		if(close(fd[1]) == -1)
+		{
+			perror("Ipiping close() error");
+			exit(1);
+		}
+	}
+	string str(argv2[0]);
+	splitpipes(str);
+}//void dopipes()
