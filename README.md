@@ -7,7 +7,7 @@ Installation guide
 ```
    $ git clone  http://github.com/SpaceCowboy100/rshell.git
    $ cd rshell
-   $ git checkout hw0
+   $ git checkout hw2
    $ make
    $ bin/rshell
 ```
@@ -44,10 +44,11 @@ outputs  ```hello world```
 
 * error is thrown if host name exceeds 50 characters
 
-* piping only functions with one pipe, it cannot be chained
+* piping only functions with one pipe, it cannot be chained.
 
-* piping throws several perrors, with correct output in only some cases
+* piping throws several perrors, with correct output in only some cases.
 
+* make must be called after every IO redirection command ```<``` ```>``` ```>>``` ```|```.
 
 ls
 ===
