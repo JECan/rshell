@@ -44,6 +44,11 @@ outputs  ```hello world```
 
 * error is thrown if host name exceeds 50 characters
 
+* piping only functions with one pipe, it cannot be chained
+
+* piping throws several perrors, with correct output in only some cases
+
+
 ls
 ===
 rshell also includes an implementation of the ```ls``` command to download this implementation of ls do the following.
