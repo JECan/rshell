@@ -19,6 +19,9 @@ void pipes(const string &usercommand);
 void inputredirect(const string &usercommand);
 void outputappend(const string &usercommand);
 void outputtrunc(const string &usercommand);
+void splitpipes(const string &usercommand);
+void dopipes(char **argv1, char **argv2);
+
 int main()
 {	
 	//obtaining username and hostname
@@ -74,7 +77,7 @@ int main()
 		//cheeck for piping and io redirection
 		else if(userinput.find("|") != string::npos)
 		{
-			pipes(userinput);
+			splitpipes(userinput);
 		}
 /*		else if(userinput.find("<") != string::npos)
 		{
@@ -174,14 +177,14 @@ void inputredirect(const string &usercommand)
 {
 	string carrot = "<";
 	int flags = O_RDONLY;
-	int fd2[2];
+//	int fd2[2];
 	int carrotloc = usercommand.find(carrot);
 	string leftofin = usercommand.substr(0, carrotloc);
 	string rightofin = usercommand.substr(usercommand.find(carrot) + 2);
 	string cpyright = rightofin;
 	if((leftofin == "") || (rightofin == ""))
 	{
-		cout << "There is no file entered\n";
+		cout << "Invalid input\n";
 		return;
 	}
 
@@ -244,13 +247,11 @@ void inputredirect(const string &usercommand)
 	if(dup2(savestdout, 1) == -1)
 	{
 		perror("dup2 error restoring");
-//		exit(1);
 	}
 	//closing savestdout
 	if(close(savestdout) == -1)
 	{
 		perror("colse() error");
-//		exit(1);
 	}
 	//must delete argv
 	int j = 0;
@@ -332,13 +333,11 @@ void outputappend(const string &usercommand)
 	if(dup2(savestdout, 1) == -1)
 	{
 		perror("dup2 error restoring");
-//		exit(1);
 	}
 	//closing savestdout
 	if(close(savestdout) == -1)
 	{
 		perror("colse() error");
-//		exit(1);
 	}
 	//must delete argv
 	int j = 0;
@@ -420,13 +419,11 @@ void outputtrunc(const string &usercommand)
 	if(dup2(savestdout, 1) == -1)
 	{
 		perror("dup2 error restoring");
-//		exit(1);
 	}
 	//closing savestdout
 	if(close(savestdout) == -1)
 	{
 		perror("colse() error");
-//		exit(1);
 	}
 	//must delete argv
 	int j = 0;
@@ -437,85 +434,108 @@ void outputtrunc(const string &usercommand)
 	}
 }//void outputtrunc()
 //-------------------------------------------------------------
-void pipes(const string &usercommand)
+void splitpipes(const string &usercommand)
 {
+//	char **argv1 = new char*[64];
+//	char **argv2 = new char*[64];
 	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
 	string rightofpipe = usercommand.substr(usercommand.find("|")+1);
-//	char *pipeinput[512];
-	
-/*	typedef tokenizer <char_separator<char> > MYTOKENS;
-	char_separator<char> PIPESEP("|");
-	MYTOKENS tok(leftofpipe, PIPESEP);
 
-	vector <string> tokenvector;
-
-	for(MYTOKENS::iterator tok_iter = tok.begin();
-		tok_iter != tok.end(); tok_iter++)
+	if(!usercommand.find("|"))
 	{
-		tokenvector.push_back(*tok_iter);
+		return;
 	}
-	for(unsigned i = 0; i < tokenvector.size(); i++)
+	if(rightofpipe == "")
 	{
-*/
-		int fd[2];
-		if(pipe(fd) == -1)
+		return;
+	}
+//--------
+	char *argv1[512];
+	int i = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(leftofpipe, COMSEPARATOR);
+
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv1[i] = new char[(*com_iter).size()];
+		strcpy(argv1[i],(*com_iter).c_str());
+	}
+//+++++++++++++++++++++=	
+	char *argv2[512];
+	int j = 0;
+	typedef tokenizer<char_separator<char> > COMTOKEN2;
+	char_separator<char> COMSEPARATOR2 (" ");
+	COMTOKEN2 etok2(rightofpipe, COMSEPARATOR2);
+
+	for(COMTOKEN2::iterator com_iter2 = etok2.begin();
+		com_iter2 != etok2.end(); j++, com_iter2++)
+	{
+		argv2[j] = new char[(*com_iter2).size()];
+		strcpy(argv2[j],(*com_iter2).c_str());
+	}
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	dopipes(argv1, argv2);
+	//must delete argv
+	int k = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+		del_iter != etok.end(); k++, del_iter++)
+	{
+		delete [] argv1[k];
+	}
+	int l = 0;
+	for(COMTOKEN2::iterator del_iter2 = etok2.begin();
+		del_iter2 != etok2.end(); l++, del_iter2++)
+	{
+		delete [] argv2[l];
+	}
+//-------
+}
+//-------------------------------------------------------------
+void dopipes(char **argv1, char **argv2)
+{
+	int fd[2];
+	if(pipe(fd) == -1)
+	{
+		perror("pipe() error");
+//		exit(1);
+	}
+	int pid = fork();
+	if(pid == -1)
+	{
+		perror("piping fork() error");
+//		exit(1);
+	}
+	else if(pid == 0)
+	{
+		if(dup2(fd[1],1) == -1)
 		{
-			perror("pipe() error");
+			perror("piping dup2() error");
+//			exit(1);
+		}
+		if(close(fd[0]) == -1)
+		{
+			perror("piping close() error");
+//			exit(1);
+		}
+		if(execvp(argv1[0], argv1));
+		{	
+			perror("piping execvp() error");
 			exit(1);
 		}
-		int pid = fork();
-
-		if (pid == -1)
+	}
+	else
+	{
+	//	int holdstdin;
+//		int parentstatus;
+		if(wait(0) == -1)
 		{
-			perror("piping fork() error");
+			perror("piping wait() error");
 			exit(1);
 		}
-//-----------------------------------------------------	
-		else if(pid == 0)
-		{
-//			string dothistoken = tokenvector.at(i);
-			char *argv[512];
-			int i = 0;
-			typedef tokenizer<char_separator<char> > COMTOKEN;
-			char_separator<char> COMSEPARATOR (" ");
-			COMTOKEN etok(leftofpipe, COMSEPARATOR);
-
-			for(COMTOKEN::iterator com_iter = etok.begin();
-				com_iter != etok.end(); i++, com_iter++)
-			{
-				argv[i] = new char[(*com_iter).size()];
-				strcpy(argv[i],(*com_iter).c_str());
-			}
-	
-			//in child, write to pipe
-			if(close(fd[0]) == -1)
-			{
-				perror("close() error");
-				exit(1);
-			}
-			if(dup2(fd[1], 1) == -1)
-			{
-				perror("dup2() error");
-				exit(1);
-			}
-			if(execvp(argv[0], argv) == -1)
-			{
-				perror("piping execvp() error");
-				exit(1);
-			}
-			//must delete argv
-			int j = 0;
-			for(COMTOKEN::iterator del_iter = etok.begin();
-				del_iter != etok.end(); j++, del_iter++)
-				{
-					delete [] argv[j];
-				}
-		}
-//-----------------------------------------------------	
-		//now read in from pipe
-		int holdstdin;
-		int parentstatus;
-		//changing stdin
+	}
+	int holdstdin;
 		if((holdstdin = dup(0)) == -1)
 		{
 			perror("piping dup() error");
@@ -531,12 +551,11 @@ void pipes(const string &usercommand)
 			perror("piping close() error");
 			exit(1);
 		}
-		if(wait(&parentstatus) == -1)
-		{
-			perror("piping wait() error");
-			exit(1);
-		}
-		//must restore stdin
+		
+		string str(argv2[0]);
+		splitpipes(str);
 		dup2 (holdstdin,0);
-//	}
+}
+void pipes(const string &usercommand)
+{
 }//void pipes()
