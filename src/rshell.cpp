@@ -79,11 +79,11 @@ int main()
 		{
 			splitpipes(userinput);
 		}
-/*		else if(userinput.find("<") != string::npos)
+		else if(userinput.find("<") != string::npos)
 		{
 			inputredirect(userinput);
 		}
-*/
+
 		else if(userinput.find(">>") != string::npos)
 		{
 			outputappend(userinput);
@@ -202,7 +202,7 @@ void inputredirect(const string &usercommand)
 	}
 
 	//saving std out 
-	int savestdout = dup(1);
+	int savestdout = dup(0);
 	if(savestdout == -1)
 	{
 		perror("dup() error, output redirection");
@@ -210,7 +210,7 @@ void inputredirect(const string &usercommand)
 	}
 	//setting writeto to the new stdout
 	//must restore stdout later
-	if(dup2(searchthis, 1) == -1)
+	if(dup2(searchthis, 0) == -1)
 	{
 		perror("dup2() error, output redirection");
 		exit(1);
