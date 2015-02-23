@@ -15,7 +15,6 @@ using namespace std;
 using namespace boost;
 
 void parse(const string &usercommand, const char specialchar[]);
-void pipes(const string &usercommand);
 void inputredirect(const string &usercommand);
 void outputappend(const string &usercommand);
 void outputtrunc(const string &usercommand);
@@ -64,7 +63,6 @@ int main()
 			}
 		}
 		userinput = checkcomment;
-
 		//check for special characters ; || &&
 		if(userinput.find("&&") != string::npos)
 		{
@@ -83,7 +81,6 @@ int main()
 		{
 			inputredirect(userinput);
 		}
-
 		else if(userinput.find(">>") != string::npos)
 		{
 			outputappend(userinput);
@@ -96,7 +93,6 @@ int main()
 		{
 			parse(userinput,SEMICOLON);
 		}
-
 		//exit check
 		typedef tokenizer<char_separator<char> > EXITTOKEN;
 		char_separator<char> EXITSEPARATOR (" ");
@@ -106,7 +102,6 @@ int main()
 		{
 			if(*exit_iter == "exit") exit(EXIT_SUCCESS);
 		}
-
 	}//while(1)
 	return 0;
 } // end of main
@@ -169,7 +164,6 @@ void parse(const string &usercommand, const char specialchar[])
 				exit(1);
 			}
 		}
-		
 	}
 }//void parse()
 //-------------------------------------------------------------
@@ -177,7 +171,6 @@ void inputredirect(const string &usercommand)
 {
 	string carrot = "<";
 	int flags = O_RDONLY;
-//	int fd2[2];
 	int carrotloc = usercommand.find(carrot);
 	string leftofin = usercommand.substr(0, carrotloc);
 	string rightofin = usercommand.substr(usercommand.find(carrot) + 2);
@@ -436,11 +429,8 @@ void outputtrunc(const string &usercommand)
 //-------------------------------------------------------------
 void splitpipes(const string &usercommand)
 {
-//	char **argv1 = new char*[64];
-//	char **argv2 = new char*[64];
 	string leftofpipe = usercommand.substr(0,usercommand.find("|"));
 	string rightofpipe = usercommand.substr(usercommand.find("|")+1);
-
 	if(!usercommand.find("|"))
 	{
 		return;
@@ -449,7 +439,7 @@ void splitpipes(const string &usercommand)
 	{
 		return;
 	}
-//--------
+
 	char *argv1[512];
 	int i = 0;
 	typedef tokenizer<char_separator<char> > COMTOKEN;
@@ -490,38 +480,108 @@ void splitpipes(const string &usercommand)
 	{
 		delete [] argv2[l];
 	}
-//-------
-}
+}//void splitpipes()
 //-------------------------------------------------------------
 void dopipes(char **argv1, char **argv2)
 {
+//from syscall tutorial
+/*	const int PIPE_READ = 0; 
+	const int PIPE_WRITE = 1;
 	int fd[2];
 	if(pipe(fd) == -1)
-	{
 		perror("pipe() error");
+	
+	int pid = fork();
+	if(pid == -1)
+	{
+		perror("piping fork() error");
+		exit(1);
+	}
+
+	else if(pid == 0)//child process
+	{
+		cout << "FIRST CHILD PROCESS";
+		if(dup2(fd[PIPE_WRITE],1) == -1)
+			perror("piping dup2() error");
+		if(close(fd[PIPE_READ]) == -1)
+			perror("piping close() error");
+		if((execvp(argv1[0], argv1)) == -1);
+		{	
+			perror("Epiping execvp() error");
+		}
+		exit(1);//prevent zombies
+	}
+
+	else if (pid >0)//first parent function
+	{
+if((wait(0)) == -1)
+			perror("piping wait() error");
+		
+
+		int savestdin;
+		if((savestdin = dup(0)) == -1)
+			perror("piping dup() error");
+		
+		int pid2 = fork();
+		if(pid2 == -1)
+		{
+			perror("piping fork() error");
+			exit(1);
+		}
+
+		else if(pid2 == 0)//second child process
+		{
+			cout << "SECOND CHILD PROCESS";
+
+			if((dup2(fd[PIPE_READ],0)) == -1 )
+				perror("dup2() error");
+			if((close(fd[PIPE_WRITE])) == -1)
+				perror("close() error");
+
+			if((execvp(argv2[0], argv2)) == -1)
+				perror("execvp() argv2 error");
+			exit(1);
+		}
+		else if(pid2 > 0)
+		{
+			if((wait(0)) == -1)
+				perror("wait() error");
+		}
+		if((dup2(savestdin,0)) == -1)
+		perror("error with dup2()");
+
+	}
+//	if((dup2(savestdin,0)) == -1)
+//		perror("error with dup2()");
+*/
+	int fd[2];
+	//int fd2[2];
+	if(pipe(fd) == -1)
+	{
+		perror("Apipe() error");
 //		exit(1);
 	}
 	int pid = fork();
 	if(pid == -1)
 	{
-		perror("piping fork() error");
+		perror("Bpiping fork() error");
 //		exit(1);
 	}
 	else if(pid == 0)
 	{
-		if(dup2(fd[1],1) == -1)
-		{
-			perror("piping dup2() error");
-//			exit(1);
-		}
 		if(close(fd[0]) == -1)
 		{
-			perror("piping close() error");
+			perror("Dpiping close() error");
+//			exit(1);
+		}
+		if(dup2(fd[1],1) == -1)
+		{
+			perror("Cpiping dup2() error");
 //			exit(1);
 		}
 		if(execvp(argv1[0], argv1));
 		{	
-			perror("piping execvp() error");
+			perror("Epiping execvp() error");
 			exit(1);
 		}
 	}
@@ -531,31 +591,32 @@ void dopipes(char **argv1, char **argv2)
 //		int parentstatus;
 		if(wait(0) == -1)
 		{
-			perror("piping wait() error");
+			perror("Fpiping wait() error");
 			exit(1);
 		}
-	}
-	int holdstdin;
+		int holdstdin;
 		if((holdstdin = dup(0)) == -1)
 		{
-			perror("piping dup() error");
-			exit(1);
-		}
-		if(dup2(fd[0],0) == -1)
-		{
-			perror("piping dup2() error");
-			exit(1);
-		}
-		if(close(fd[1]) == -1)
-		{
-			perror("piping close() error");
+			perror("Gpiping dup() error");
 			exit(1);
 		}
 		
-		string str(argv2[0]);
-		splitpipes(str);
-		dup2 (holdstdin,0);
-}
-void pipes(const string &usercommand)
-{
-}//void pipes()
+		
+		if(dup2(fd[0],0) == -1)
+		{
+			perror("Hpiping dup2() error");
+			exit(1);
+		}
+
+		if(close(fd[1]) == -1)
+		{
+			perror("Ipiping close() error");
+			exit(1);
+		}
+	}
+//	if(close(0) == -1)
+//		perror("closeasdf");
+
+	string str(argv2[0]);
+	splitpipes(str);
+}//void dopipes()
