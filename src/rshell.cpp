@@ -14,7 +14,7 @@
 using namespace std;
 using namespace boost;
 
-void parse(const string &usercommand, const char specialchar[]);
+void parse(const string &usercommand, const char specialchar[], const bool &isOR, const bool &isAND);
 void inputredirect(const string &usercommand);
 void outputappend(const string &usercommand);
 void outputtrunc(const string &usercommand);
@@ -27,9 +27,9 @@ int main()
 	char host[64] = {0};
 	string displayuser;
 	string userinput;
-
-	string username = getlogin();
-	if(getlogin() == NULL)
+	string username;
+	username = getlogin();
+	if(username == "")
 	{
 		perror("getlogin() error.");
 	}
@@ -48,6 +48,8 @@ int main()
 	char SEMICOLON[] = ";";
 	char ANDING[] = "&&";
 	char ORING[] = "||";
+	bool isOR = false;
+	bool isAND = false;
 	while(1)
 	{
 		cout << displayuser;
@@ -66,11 +68,15 @@ int main()
 		//check for special characters ; || &&
 		if(userinput.find("&&") != string::npos)
 		{
-			parse(userinput,ANDING);
+			isAND = true;
+			isOR = false;
+			parse(userinput,ANDING, isOR, isAND);
 		}
 		else if(userinput.find("||")!= string::npos)
 		{
-			parse(userinput,ORING);
+			isAND = false;
+			isOR = true;
+			parse(userinput,ORING,isOR,isAND);
 		}
 		//cheeck for piping and io redirection
 		else if(userinput.find("|") != string::npos)
@@ -91,7 +97,9 @@ int main()
 		}
 		else
 		{
-			parse(userinput,SEMICOLON);
+			isAND = false;
+			isOR = false;
+			parse(userinput,SEMICOLON, isOR, isAND);
 		}
 		//exit check
 		typedef tokenizer<char_separator<char> > EXITTOKEN;
@@ -106,7 +114,7 @@ int main()
 	return 0;
 } // end of main
 //-------------------------------------------------------------
-void parse(const string &usercommand, const char specialchar[])
+void parse(const string &usercommand, const char specialchar[], const bool &isOR, const bool &isAND)
 {
 	typedef tokenizer<char_separator<char> > MYTOKENS;
 	char_separator<char> MYSEPARATOR(specialchar);
@@ -139,7 +147,7 @@ void parse(const string &usercommand, const char specialchar[])
 				strcpy(argv[i],(*com_iter).c_str());
 			}
 			
-			argv[i] = 0;
+			argv[i]=0;
 			if(execvp(argv[0],argv) == -1)
 			{
 				perror("error execvp()");
@@ -162,6 +170,17 @@ void parse(const string &usercommand, const char specialchar[])
 			{
 				perror("error with wait()");
 				exit(1);
+			}
+			//if first or succeed, return
+			if((WEXITSTATUS(parentstatus) == 0) && (isOR == true))
+			{
+				return; 
+			}
+			//if first and doesnt succeed, return
+			if((WEXITSTATUS(parentstatus) != 0) && (isAND == true))
+			{
+				cerr << "Error in first command\n";
+				return; 
 			}
 		}
 	}
