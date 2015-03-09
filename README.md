@@ -34,7 +34,6 @@ outputs  ```hello world```
 
 * A semicolon followed by a valid command executes `ie. jcand003@hammer$ ;pwd`
 
-* The or connector does function not  correctly if the first arguement and second arguement are true.
 
 * Valid arguements but connected by a ;; passes such as```ls;; ls```.
 
@@ -49,6 +48,8 @@ outputs  ```hello world```
 * piping throws several perrors, with correct output in only some cases.
 
 * make must be called after every IO redirection command ```<``` ```>``` ```>>``` ```|```.
+
+* `cd` changes to home directory only, it cannot take in arguements.
 
 ls
 ===
