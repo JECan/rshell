@@ -10,21 +10,30 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <boost/tokenizer.hpp>
+#include <sys/stat.h>
 #include <signal.h>
 using namespace std;
 using namespace boost;
 
 void parse(const string &usercommand, const char specialchar[], const bool &isOR, const bool &isAND);
+void myexec(const string &usercommand);
 void inputredirect(const string &usercommand);
 void outputredir(const string &usercommand, const bool &weappend);
-//void outputtrunc(const string &usercommand);
 void splitpipes(const string &usercommand);
 void dopipes(char **argv1, char **argv2);
 void ctrlc(int signum);
-void ctrlz(int signum);
+string getpath(string executethis);
+void exittheshell();
+string gohome(string mypath);
+string mypath(string mypath);
+string mycmd(string cmd);
 int main()
 {	
-	//obtaining username and hostname
+	if(signal(SIGINT, SIG_IGN) == SIG_ERR)
+	{
+		perror("signal error");
+		exittheshell();
+	}
 	char host[64] = {0};
 	string displayuser;
 	string userinput = "";
@@ -45,7 +54,17 @@ int main()
 		if(host[i] == '.') host[i] = '\0';
 	}
 	
+	char mycwd[BUFSIZ];
+	if(getcwd(mycwd, sizeof(mycwd)) == NULL)
+	{
+		perror("getcwd() error");
+		exittheshell();
+	}
+
 	displayuser = username + "@" + host + "$ ";
+	cout << mycwd << endl;
+	cout << displayuser;
+
 	char SEMICOLON[] = ";";
 	char ANDING[] = "&&";
 	char ORING[] = "||";
@@ -53,37 +72,16 @@ int main()
 	bool isAND = false;
 	while(1)
 	{
-		cout << displayuser;
 		getline(cin, userinput);
-		if(userinput == "exit")
-		{
-			exit(EXIT_SUCCESS);
-		}	
-		if(userinput == "")
-			continue;
-
 		if(signal(SIGINT, ctrlc) == SIG_ERR)
 		{
 			perror("signal() error ctrl+c");
-			exit(1);
+			exittheshell();
 		}
-		if(signal(SIGTSTP, ctrlz) == SIG_ERR)
+		if(userinput.find('#') != string::npos)
 		{
-			perror("signal() error ctrl+z");
-			exit(1);
+			userinput = userinput.substr(0, userinput.find('#'));
 		}
-		//checks for comment '#'
-		string checkcomment = userinput;
-		for(unsigned int i=0; i <= checkcomment.size()-1; i++)
-		{
-			if(userinput == "")
-				break;
-			if(checkcomment[i] == '#')
-			{
-				checkcomment[i] = '\0';
-			}
-		}
-		userinput = checkcomment;
 		//check for special characters ; || &&
 		if(userinput.find("&&") != string::npos)
 		{
@@ -114,30 +112,20 @@ int main()
 		{
 			outputredir(userinput, false);
 		}
-//		else if(userinput.find("cd") != string::npos)
-//		{
-//			changethedir(userinput);
-//		}
-		else if(userinput.find("exit") != string::npos)
-		{
-			parse(userinput,SEMICOLON,false, false);
-		}
 		else
 		{
 			isAND = false;
 			isOR = false;
 			parse(userinput,SEMICOLON, isOR, isAND);
 		}
-		//exit check
-/*		typedef tokenizer<char_separator<char> > EXITTOKEN;
-		char_separator<char> EXITSEPARATOR (" ");
-		EXITTOKEN etok(userinput, EXITSEPARATOR);
-		for(EXITTOKEN::iterator exit_iter = etok.begin();
-			exit_iter != etok.end(); exit_iter++)
+		if(getcwd(mycwd, sizeof(mycwd)) == NULL)
 		{
-			if(*exit_iter == "exit") exit(EXIT_SUCCESS);
+			perror("getcwd() error");
+			exit(1);
 		}
-*/	
+		displayuser = username + "@" + host + "$ ";
+		cout << mycwd << endl;
+		cout << displayuser;
 	}//while(1)
 	return 0;
 } // end of main
@@ -147,55 +135,21 @@ void parse(const string &usercommand, const char specialchar[], const bool &isOR
 	typedef tokenizer<char_separator<char> > MYTOKENS;
 	char_separator<char> MYSEPARATOR(specialchar);
 	MYTOKENS tok(usercommand, MYSEPARATOR);
-	string dothistoken;
 	for(MYTOKENS::iterator tok_iter = tok.begin();
-		tok_iter != tok.end(); tok_iter++)
+		tok_iter != tok.end(); ++tok_iter)
 	{
 		int pid = fork();
 		//if pid == -1 throw error
 		if(pid == -1)
 		{
 			perror("error with fork()");
-			exit(1);
+			exittheshell();
 		}
 		//else if pid == 0 were in child
 		else if(pid == 0)
 		{
-			//----------------------------------
-			//const char ayoexit[] = "exit";
-			dothistoken = *tok_iter;
-			char *argv[512];
-			int i = 0;
-			typedef tokenizer<char_separator<char> > COMTOKEN;
-			char_separator<char> COMSEPARATOR (" ");
-			COMTOKEN etok(dothistoken, COMSEPARATOR);
-
-			for(COMTOKEN::iterator com_iter = etok.begin();
-				com_iter != etok.end(); i++, com_iter++)
-			{
-				if((*tok_iter) == "exit")
-				{
-					exit(EXIT_SUCCESS);
-				}
-
-				argv[i] = new char[(*com_iter).size()];
-				strcpy(argv[i],(*com_iter).c_str());
-			}
-			
-			argv[i]=0;
-			if(execvp(argv[0],argv) == -1)
-			{
-				perror("error execvp()");
-				exit(1);
-			}
-			//must delete argv
-			int j = 0;
-			for(COMTOKEN::iterator del_iter = etok.begin();
-				del_iter != etok.end(); j++, del_iter++)
-				{
-					delete [] argv[j];
-				}
-
+			string dothistoken = *tok_iter;
+			myexec(dothistoken);	
 		}
 		//else we are in parent
 		else
@@ -204,22 +158,180 @@ void parse(const string &usercommand, const char specialchar[], const bool &isOR
 			if(wait(&parentstatus) == -1)
 			{
 				perror("error with wait()");
-				exit(1);
+				exittheshell();
 			}
-			//if first or succeed, return
-			if((WEXITSTATUS(parentstatus) == 0) && (isOR == true))
+			bool killkid = WIFEXITED(parentstatus);
+			if((killkid == true) && (WEXITSTATUS(parentstatus) == 0) && (isOR == true))
 			{
 				return; 
 			}
-			//if first and doesnt succeed, return
-			if((WEXITSTATUS(parentstatus) != 0) && (isAND == true))
+			else if((killkid == true) && (WEXITSTATUS(parentstatus) == 1) && (isAND == true))
 			{
-//				cerr << "Error in first command\n";
 				return; 
 			}
+			else if((killkid == true) && (WEXITSTATUS(parentstatus) == 99))
+			{
+				exit(EXIT_SUCCESS);
+			}
+			else if((killkid == true) && (WEXITSTATUS(parentstatus) == 89))
+			{
+				string anothertemp = "";
+				string holycrap = gohome(anothertemp);
+				int i = chdir(holycrap.c_str());
+				if(i == -1)
+					perror("chdir");
+				return;
+			}
+			else if((killkid == true) && (WEXITSTATUS(parentstatus) == 79))
+			{
+				cout << "cd with arguement\n";
+				string justtemp = "";
+				string anothertemp = "";
+				string holycrap = gohome(anothertemp);
+				string copyofholycrap = holycrap;
+				string omgplz = mypath(justtemp); 
+				copyofholycrap += omgplz;
+				int i = chdir(copyofholycrap.c_str());
+				if(i == -1)
+					perror("chdir");
+				return;
+			}
+
 		}
 	}
 }//void parse()
+//-------------------------------------------------------------
+void myexec(const string &usercommand)
+{
+	char *argv[512];
+	typedef tokenizer<char_separator<char> > COMTOKEN;
+	char_separator<char> COMSEPARATOR (" ");
+	COMTOKEN etok(usercommand, COMSEPARATOR);
+
+	typedef tokenizer<char_separator<char> > CHECKTOK;
+	char_separator<char> SPACES (" ");
+	CHECKTOK specialtok(usercommand,SPACES);
+	CHECKTOK::iterator yoloiter = specialtok.begin();
+	if(yoloiter != specialtok.end())
+	{
+		if((*yoloiter) == "exit")
+		{
+			exit(99);
+		}
+		if((*yoloiter) == "cd")
+		{
+			exit(89);
+		}
+//		if(((*yoloiter) == "cd") && (yoloiter != specialtok.end()))
+//		{
+//			exit(79);
+//		}
+	}
+
+	int i = 0;
+	for(COMTOKEN::iterator com_iter = etok.begin();
+		com_iter != etok.end(); i++, com_iter++)
+	{
+		argv[i] = new char[(*com_iter).size()];
+		strcpy(argv[i],(*com_iter).c_str());
+	}
+	argv[i]=0;
+	string plzwork = mycmd(argv[0]); 
+	if(execv(plzwork.c_str(),argv) == -1)
+	{
+		perror("error execv()");
+		exittheshell();
+	}
+	//must delete argv
+	int j = 0;
+	for(COMTOKEN::iterator del_iter = etok.begin();
+		del_iter != etok.end(); j++, del_iter++)
+	{
+		delete [] argv[j];
+	}
+}//void myexec()
+//-------------------------------------------------------------
+string gohome(string mypath)
+{		
+	const char* etgohome = getenv("HOME");
+	if(chdir(etgohome) == -1)
+	{
+		perror("chdir() home error");
+		exittheshell();
+	}
+
+	char mycwd[BUFSIZ];
+	if(getcwd(mycwd, sizeof(mycwd)) == NULL)
+	{
+		perror("getcwd() error");
+		exittheshell();
+	}
+	string yolotemp = mycwd;
+	return yolotemp;
+}
+string mypath(string mypath)
+{
+	string slash = "/";
+	vector <string> vcmd;
+	const char* etgopath = getenv("PATH");
+	if(chdir(etgopath) == -1)
+	{
+		perror("chdir() error");
+		exittheshell();
+	}
+
+	char mycwd[BUFSIZ];
+	if(getcwd(mycwd, sizeof(mycwd)) == NULL)
+	{
+		perror("getcwd() error");
+		exittheshell();
+	}
+	string yolotemp = mycwd;
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(":");
+	MYTOKENS tok(yolotemp, MYSEPARATOR);
+	for(MYTOKENS::iterator tok_iter = tok.begin();
+		tok_iter != tok.end(); ++tok_iter)
+	{
+		string appending = *tok_iter + slash + mypath;
+		vcmd.push_back(appending);
+	}
+
+	return vcmd.at(0);
+}
+string mycmd(string cmd)
+{
+	string slash = "/";
+	vector <string> vcmd;
+	char *myname = getenv("PATH");
+	if(myname == NULL)
+	{
+		perror("getenv() err");
+		exittheshell();
+	}
+	string mytemp = myname;
+	typedef tokenizer<char_separator<char> > MYTOKENS;
+	char_separator<char> MYSEPARATOR(":");
+	MYTOKENS tok(mytemp, MYSEPARATOR);
+	for(MYTOKENS::iterator tok_iter = tok.begin();
+		tok_iter != tok.end(); ++tok_iter)
+	{
+		string appending = *tok_iter + slash + cmd;
+		vcmd.push_back(appending);
+	}
+	for(unsigned i = 0; i < vcmd.size(); i++)
+	{
+		struct stat mybuf;
+		if(stat(vcmd.at(i).c_str(), &mybuf) == -1)
+		{
+			continue;
+		}
+		else
+			return vcmd.at(i);
+	}
+	//throws error
+	return cmd;
+}//string mycmd()
 //-------------------------------------------------------------
 void inputredirect(const string &usercommand)
 {
@@ -234,7 +346,6 @@ void inputredirect(const string &usercommand)
 		cout << "Invalid input\n";
 		return;
 	}
-
 	//tokenize right side for spaces
 	typedef tokenizer<char_separator<char> > MYTOKENS;
 	char_separator<char> MYSEPARATOR(" ");
@@ -247,7 +358,6 @@ void inputredirect(const string &usercommand)
 		perror("open() error");
 		return;
 	}
-
 	//saving std out 
 	int savestdout = dup(0);
 	if(savestdout == -1)
@@ -268,7 +378,6 @@ void inputredirect(const string &usercommand)
 		perror("close() error, output redirection");
 		exit(1);
 	}
-
 	//parsing left side for spaces, and calliing execvp on leftside
 	char *argv[2];
 	int i = 0;
@@ -284,12 +393,12 @@ void inputredirect(const string &usercommand)
 	}
 	//only want first command, if argv i != NULL then error is thrown	
 	argv[i] = NULL;
-	if(execvp(argv[0],argv) == -1)
+	string plzwork = mycmd(argv[0]); 
+	if(execv(plzwork.c_str(),argv) == -1)
 	{
-		perror("error execvp()");
+		perror("error execv()");
 		exit(1);
 	}
-
 	//restoring stdout
 	if(dup2(savestdout, 1) == -1)
 	{
@@ -323,8 +432,6 @@ void outputredir(const string &usercommand, const bool &weappend)
 		carrot = ">";
 		flags = O_CREAT | O_WRONLY | O_TRUNC;
 	}
-//	string carrot = ">>";
-//	int flags = O_CREAT | O_WRONLY | O_APPEND;
 	int carrotloc = usercommand.find(carrot);
 	string leftofout = usercommand.substr(0, carrotloc);
 	string rightofout = usercommand.substr(usercommand.find(carrot) + 2);
@@ -333,7 +440,6 @@ void outputredir(const string &usercommand, const bool &weappend)
 		cout << "Invalid entry\n";
 		return;	
 	}
-
 	//tokenize right side for spaces
 	typedef tokenizer<char_separator<char> > MYTOKENS;
 	char_separator<char> MYSEPARATOR(" ");
@@ -366,7 +472,6 @@ void outputredir(const string &usercommand, const bool &weappend)
 		perror("close() error, output redirection");
 		exit(1);
 	}
-
 	//parsing left side for spaces, and calliing execvp on leftside
 	char *argv[2];
 	int i = 0;
@@ -382,12 +487,13 @@ void outputredir(const string &usercommand, const bool &weappend)
 	}
 	//only want first command, if argv i != NULL then error is thrown	
 	argv[i] = NULL;
-	if(execvp(argv[0],argv) == -1)
+	string plzwork = mycmd(argv[0]); 
+
+	if(execv(plzwork.c_str(),argv) == -1)
 	{
-		perror("error execvp()");
+		perror("error execv()");
 		exit(1);
 	}
-
 	//restoring stdout
 	if(dup2(savestdout, 1) == -1)
 	{
@@ -419,7 +525,6 @@ void splitpipes(const string &usercommand)
 	{
 		return;
 	}
-
 	char *argv1[512];
 	int i = 0;
 	typedef tokenizer<char_separator<char> > COMTOKEN;
@@ -529,19 +634,18 @@ void ctrlc(int signum)
 		if(pid == -1)
 		{	
 			perror("getpid() error");
-			exit(1);
+			exittheshell();
 		}
 		if(pid == 0)
 		{
-			if(kill(0,SIGINT) == -1)
-			{
-				perror("kill() error");
-			}
+			exit(0);
 		}
+		return;
 	}
 	cout << "\n";
-}
-void ctrlz(int signum)
-{
+}//ctrlc()
 
+void exittheshell()
+{
+	exit(1);
 }
