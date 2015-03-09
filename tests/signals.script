@@ -1,0 +1,205 @@
+Script started on Sun 08 Mar 2015 10:12:38 PM PDT
+~
+jcand003@hammer $ ls
+[0m[01;32ma.out[0m*  ctrlc.cpp  [01;34mDownloads[0m/  [01;34mfirstdraft[0m/  [01;34mrshell[0m/
+[01;34mCS100[0m/  [01;34mDesktop[0m/   [01;34mfall2014[0m/   [01;34mhw4[0m/         [01;34mucr-cs100[0m/
+[m~
+jcand003@hammer $ d[Kcd CS100/rshell/
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #now beginning tests
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #tests for path variable and execv
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ls
+a.out	    bin		  input.txt  Makefile	    README.md  tests
+append.txt  infinite.cpp  LICENSE    overwrite.txt  src
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ls;pwd
+a.out	    bin		  input.txt  Makefile	    README.md  tests
+append.txt  infinite.cpp  LICENSE    overwrite.txt  src
+/home/csmajs/jcand003/CS100/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ls && pwd
+a.out	    bin		  input.txt  Makefile	    README.md  tests
+append.txt  infinite.cpp  LICENSE    overwrite.txt  src
+/home/csmajs/jcand003/CS100/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ pwd || ls
+/home/csmajs/jcand003/CS100/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #execv workds with comnectors
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #testing PATH with io redirection < >> >
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #i have to call make after every io rec direct
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat input.txt
+this in input.txt
+123456789
+123456
+123
+12
+1
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat <<  input.txt
+this in input.txt
+123456789
+123456
+123
+12
+1
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ grep 1 < input.txt
+123456789
+123456
+123
+12
+1
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat append.txt
+plz append this
+yolo
+swag
+yolo
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ echo imappending >> append.txt
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat appeen  nd.txt
+plz append this
+yolo
+swag
+yolo
+imappending
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat     echo    cat ove erwrite.txt
+plzoverwrite
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ echo imoverwriting > overwrite.txt
+~/CS100/rshell
+jcand003@hammer $ make
+if [ ! -d bin ]; then mkdir bin; fi
+g++ -ansi -pedantic -Wall -Werror src/rshell.cpp -o bin/rshell
+g++ -ansi -pedantic -Wall -Werror src/ls.cpp -o bin/ls
+g++ -ansi -pedantic -Wall -Werror src/cp.cpp -o bin/cp
+~/CS100/rshell
+jcand003@hammer $ bin/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat overwrite.txt
+imoverwriting
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #exev cv works for ioredirection > >> <
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #now testing for g ctrlc
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #just ctrlc
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ^C
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #ctrlc doesnt exit program as expected
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat
+^C/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ tee
+^C/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat infinite.txt
+cat: infinite.txt: No such file or directory
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cat infinite.cpp
+#include <iostream>
+#include <string>
+using namespace std;
+int main()
+{
+	cout << "INFINITE PROGRAM OF INPUTTING\n";
+	string input;
+	while(true)
+	{
+		getline(cin,input);
+	}
+}
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #i will run ths is program and use ctrlc on it
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ g++ ininite     finite.cpp
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ ./a.out
+INFINITE PROGRAM OF INPUTTING
+im nputting stuff
+asdf
+asdf
+sadf
+sdaf
+now il ll press ctrlc to get out of here
+^C/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #cd only works as a empty command "cd" which goes to home directory
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ #it does not switch to desired directories
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ pwd
+/home/csmajs/jcand003/CS100/rshell
+/home/csmajs/jcand003/CS100/rshell
+jcand003@hammer$ cd
+/home/csmajs/jcand003
+jcand003@hammer$ pwd
+/home/csmajs/jcand003
+/home/csmajs/jcand003
+jcand003@hammer$ ls
+a.out  ctrlc.cpp  Downloads  firstdraft  rshell
+CS100  Desktop	  fall2014   hw4	 ucr-cs100
+/home/csmajs/jcand003
+jcand003@hammer$ ls && pwd
+a.out  ctrlc.cpp  Downloads  firstdraft  rshell
+CS100  Desktop	  fall2014   hw4	 ucr-cs100
+/home/csmajs/jcand003
+/home/csmajs/jcand003
+jcand003@hammer$ ls || pwd
+a.out  ctrlc.cpp  Downloads  firstdraft  rshell
+CS100  Desktop	  fall2014   hw4	 ucr-cs100
+/home/csmajs/jcand003
+jcand003@hammer$ ls;pwd
+a.out  ctrlc.cpp  Downloads  firstdraft  rshell
+CS100  Desktop	  fall2014   hw4	 ucr-cs100
+/home/csmajs/jcand003
+/home/csmajs/jcand003
+jcand003@hammer$ #c successfully changed to home directory
+/home/csmajs/jcand003
+jcand003@hammer$ #o concludes tests
+/home/csmajs/jcand003
+jcand003@hammer$ exit
+~/CS100/rshell
+jcand003@hammer $ exit
+exit
+
+Script done on Sun 08 Mar 2015 10:20:01 PM PDT
