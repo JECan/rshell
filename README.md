@@ -37,14 +37,13 @@ outputs  ```hello world```
 
 * If an invalid argument such exceeds 100 characters, and error is not thrown.
 
-
 * error is thrown if host name exceeds 50 characters
 
 * piping only functions with one pipe, it cannot be chained.
 
 * piping throws several perrors, with correct output in only some cases.
 
-* make must be called after every IO redirection command ```<``` ```>``` ```>>``` ```|```.
+* `make` must be called after every IO redirection command ```<``` ```>``` ```>>``` ```|```.
 
 * `cd` changes to home directory only, it cannot take in arguements.
 
