@@ -7,7 +7,7 @@ Installation guide
 ```
    $ git clone  http://github.com/SpaceCowboy100/rshell.git
    $ cd rshell
-   $ git checkout hw2
+   $ git checkout hw3
    $ make
    $ bin/rshell
 ```
@@ -25,7 +25,6 @@ Bugs/Limitations
 ```
 outputs  ```hello world``` 
 
-* The ```cd``` command does not work with rshell.
 
 * rshell accepts instances of the separators when it should not, the same applies for the `;` and `&` characters.
 ```
@@ -34,12 +33,10 @@ outputs  ```hello world```
 
 * A semicolon followed by a valid command executes `ie. jcand003@hammer$ ;pwd`
 
-
 * Valid arguements but connected by a ;; passes such as```ls;; ls```.
 
 * If an invalid argument such exceeds 100 characters, and error is not thrown.
 
-* ```exit``` command does exit program but throws error to execvp().
 
 * error is thrown if host name exceeds 50 characters
 
